@@ -43,82 +43,159 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reconnect'),
+        title: const Text(
+          'Reconnect',
+          style: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.bold,
+            fontSize: 28,
+            letterSpacing: 1.5,
+          ),
+        ),
+        backgroundColor: Colors.deepPurpleAccent,
+        elevation: 4,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: FutureBuilder<List<ReconnectModel>>(
-              future: futureOutOfTouchContacts,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No overdue contacts found.'));
-                } else {
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final contact = snapshot.data![index];
-                      final overdueStatus = contact.overdueStatus;
-                      return ListTile(
-                        title: Text(contact.nickName),
-                        subtitle: Text(contact.group),
-                        trailing: Text(
-                          overdueStatus.status,
-                          style: TextStyle(color: overdueStatus.color),
-                        ),
-                      );
-                    },
-                  );
-                }
-              },
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple, Colors.purpleAccent],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildBigButton(
-                  context,
-                  label: 'Add Group',
-                  icon: Icons.group_add,
-                  onPressed: () => _navigateAndRefresh(const AddGroupScreen()),
-                ),
-                _buildBigButton(
-                  context,
-                  label: 'Add Contact',
-                  icon: Icons.person_add,
-                  onPressed: () => _navigateAndRefresh(const AddContactScreen()),
-                ),
-                _buildBigButton(
-                  context,
-                  label: 'Add Interaction',
-                  icon: Icons.add_circle,
-                  onPressed: () => _navigateAndRefresh(const AddInteractionScreen()),
-                ),
-              ],
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: FutureBuilder<List<ReconnectModel>>(
+                future: futureOutOfTouchContacts,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator(color: Colors.white));
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.white, fontFamily: 'Montserrat'),
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No overdue contacts found.',
+                        style: TextStyle(color: Colors.white, fontFamily: 'Montserrat', fontSize: 18),
+                      ),
+                    );
+                  } else {
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final contact = snapshot.data![index];
+                        final overdueStatus = contact.overdueStatus;
+                        return Card(
+                          elevation: 6,
+                          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.deepPurpleAccent,
+                              child: Text(
+                                contact.nickName.isNotEmpty ? contact.nickName[0].toUpperCase() : '?',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Montserrat',
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              contact.nickName,
+                              style: const TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            subtitle: Text(
+                              contact.group,
+                              style: const TextStyle(fontFamily: 'Montserrat', fontSize: 14),
+                            ),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: overdueStatus.color.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                overdueStatus.status,
+                                style: TextStyle(
+                                  color: overdueStatus.color,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Montserrat',
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildBigButton(
+                    context,
+                    label: 'Add Group',
+                    icon: Icons.group_add,
+                    onPressed: () => _navigateAndRefresh(const AddGroupScreen()),
+                  ),
+                  _buildBigButton(
+                    context,
+                    label: 'Add Contact',
+                    icon: Icons.person_add,
+                    onPressed: () => _navigateAndRefresh(const AddContactScreen()),
+                  ),
+                  _buildBigButton(
+                    context,
+                    label: 'Add Interaction',
+                    icon: Icons.add_circle,
+                    onPressed: () => _navigateAndRefresh(const AddInteractionScreen()),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildBigButton(BuildContext context, {required String label, required IconData icon, required VoidCallback onPressed}) {
     return ElevatedButton.icon(
-      icon: Icon(icon, size: 24),
-      label: Text(label),
+      icon: Icon(icon, size: 28, color: Colors.white),
+      label: Text(
+        label,
+        style: const TextStyle(
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          letterSpacing: 1.1,
+          color: Colors.white,
+        ),
+      ),
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        backgroundColor: Colors.deepPurpleAccent,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
+        elevation: 6,
       ),
     );
   }

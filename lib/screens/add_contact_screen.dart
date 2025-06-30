@@ -94,72 +94,167 @@ class _AddContactScreenState extends State<AddContactScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Contact'),
+        title: const Text(
+          'Add Contact',
+          style: TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            letterSpacing: 1.2,
+          ),
+        ),
+        backgroundColor: Colors.deepPurpleAccent,
+        elevation: 2,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _nickNameController,
-                decoration: const InputDecoration(labelText: 'Nickname'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a nickname';
-                  }
-                  return null;
-                },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple, Colors.purpleAccent],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    TextFormField(
+                      controller: _nickNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nickname',
+                        prefixIcon: Icon(Icons.person_outline),
+                        labelStyle: TextStyle(fontFamily: 'Montserrat'),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a nickname';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _selectedGroup,
+                      hint: const Text('Select Group', style: TextStyle(fontFamily: 'Montserrat')),
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.group),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat', color: Colors.black87),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedGroup = newValue;
+                        });
+                      },
+                      items: _groups.map<DropdownMenuItem<String>>((Group group) {
+                        return DropdownMenuItem<String>(
+                          value: group.name,
+                          child: Text(group.name),
+                        );
+                      }).toList(),
+                      validator: (value) => value == null ? 'Please select a group' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _firstNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'First Name',
+                        prefixIcon: Icon(Icons.badge_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _lastNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Last Name',
+                        prefixIcon: Icon(Icons.badge),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _notesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Notes',
+                        prefixIcon: Icon(Icons.note_alt_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _phoneController,
+                      decoration: const InputDecoration(
+                        labelText: 'Phone',
+                        prefixIcon: Icon(Icons.phone_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _addressController,
+                      decoration: const InputDecoration(
+                        labelText: 'Address',
+                        prefixIcon: Icon(Icons.home_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                    ),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _submitForm,
+                        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                        label: const Text(
+                          'Add Contact',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurpleAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              DropdownButtonFormField<String>(
-                value: _selectedGroup,
-                hint: const Text('Select Group'),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedGroup = newValue;
-                  });
-                },
-                items: _groups.map<DropdownMenuItem<String>>((Group group) {
-                  return DropdownMenuItem<String>(
-                    value: group.name,
-                    child: Text(group.name),
-                  );
-                }).toList(),
-                validator: (value) => value == null ? 'Please select a group' : null,
-              ),
-              TextFormField(
-                controller: _firstNameController,
-                decoration: const InputDecoration(labelText: 'First Name'),
-              ),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: const InputDecoration(labelText: 'Last Name'),
-              ),
-              TextFormField(
-                controller: _notesController,
-                decoration: const InputDecoration(labelText: 'Notes'),
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
-              ),
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(labelText: 'Address'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Add Contact'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
