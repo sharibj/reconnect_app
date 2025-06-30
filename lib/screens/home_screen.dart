@@ -139,28 +139,62 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildBigButton(
-                    context,
-                    label: 'Add Group',
-                    icon: Icons.group_add,
-                    onPressed: () => _navigateAndRefresh(const AddGroupScreen()),
-                  ),
-                  _buildBigButton(
-                    context,
-                    label: 'Add Contact',
-                    icon: Icons.person_add,
-                    onPressed: () => _navigateAndRefresh(const AddContactScreen()),
-                  ),
-                  _buildBigButton(
-                    context,
-                    label: 'Add Interaction',
-                    icon: Icons.add_circle,
-                    onPressed: () => _navigateAndRefresh(const AddInteractionScreen()),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth < 500) {
+                    // Stack vertically for narrow screens
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildBigButton(
+                          context,
+                          label: 'Add Group',
+                          icon: Icons.group_add,
+                          onPressed: () => _navigateAndRefresh(const AddGroupScreen()),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildBigButton(
+                          context,
+                          label: 'Add Contact',
+                          icon: Icons.person_add,
+                          onPressed: () => _navigateAndRefresh(const AddContactScreen()),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildBigButton(
+                          context,
+                          label: 'Add Interaction',
+                          icon: Icons.add_circle,
+                          onPressed: () => _navigateAndRefresh(const AddInteractionScreen()),
+                        ),
+                      ],
+                    );
+                  } else {
+                    // Row for wide screens
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildBigButton(
+                          context,
+                          label: 'Add Group',
+                          icon: Icons.group_add,
+                          onPressed: () => _navigateAndRefresh(const AddGroupScreen()),
+                        ),
+                        _buildBigButton(
+                          context,
+                          label: 'Add Contact',
+                          icon: Icons.person_add,
+                          onPressed: () => _navigateAndRefresh(const AddContactScreen()),
+                        ),
+                        _buildBigButton(
+                          context,
+                          label: 'Add Interaction',
+                          icon: Icons.add_circle,
+                          onPressed: () => _navigateAndRefresh(const AddInteractionScreen()),
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
             ),
           ],
