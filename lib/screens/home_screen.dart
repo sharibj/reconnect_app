@@ -52,17 +52,11 @@ class _HomeScreenState extends State<HomeScreen> {
             letterSpacing: 1.5,
           ),
         ),
-        backgroundColor: Colors.deepPurpleAccent,
+        backgroundColor: Colors.amber[700],
         elevation: 4,
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.deepPurple, Colors.purpleAccent],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+        color: Colors.amber[50],
         child: Column(
           children: [
             Expanded(
@@ -98,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: Colors.deepPurpleAccent,
+                              backgroundColor: Colors.amber[700],
                               child: Text(
                                 contact.nickName.isNotEmpty ? contact.nickName[0].toUpperCase() : '?',
                                 style: const TextStyle(
@@ -190,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.deepPurpleAccent,
+        backgroundColor: Colors.amber[700],
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

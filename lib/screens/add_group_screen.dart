@@ -53,17 +53,11 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
             letterSpacing: 1.2,
           ),
         ),
-        backgroundColor: Colors.deepPurpleAccent,
+        backgroundColor: Colors.amber[700],
         elevation: 2,
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.deepPurple, Colors.purpleAccent],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+        color: Colors.amber[50],
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Card(
@@ -106,25 +100,40 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                     const SizedBox(height: 28),
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _submitForm,
-                        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-                        label: const Text(
-                          'Add Group',
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            letterSpacing: 1.1,
-                          ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.amber[700],
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.amber[700]!.withOpacity(0.18),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurpleAccent,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                        child: ElevatedButton.icon(
+                          onPressed: _submitForm,
+                          icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                          label: const Text(
+                            'Add Group',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              letterSpacing: 1.1,
+                              color: Colors.white,
+                            ),
                           ),
-                          elevation: 4,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 0,
+                          ),
                         ),
                       ),
                     ),
