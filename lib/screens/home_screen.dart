@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'add_contact_screen.dart';
 import 'add_group_screen.dart';
 import 'add_interaction_screen.dart';
+import 'view_interactions_screen.dart';
 import '../services/api_service.dart';
 import '../models/reconnect_model.dart';
 
@@ -169,6 +170,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: Icons.add_circle,
                           onPressed: () => _navigateAndRefresh(const AddInteractionScreen()),
                         ),
+                        const SizedBox(height: 12),
+                        _buildBigButton(
+                          context,
+                          label: 'View Interactions',
+                          icon: Icons.visibility,
+                          onPressed: () => _navigateAndRefresh(const ViewInteractionsScreen()),
+                        ),
                       ],
                     );
                   } else {
@@ -193,6 +201,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           label: 'Add Interaction',
                           icon: Icons.add_circle,
                           onPressed: () => _navigateAndRefresh(const AddInteractionScreen()),
+                        ),
+                        _buildBigButton(
+                          context,
+                          label: 'View Interactions',
+                          icon: Icons.visibility,
+                          onPressed: () => _navigateAndRefresh(const ViewInteractionsScreen()),
                         ),
                       ],
                     );

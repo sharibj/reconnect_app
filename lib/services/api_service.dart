@@ -112,4 +112,32 @@ class ApiService {
       );
     }
   }
+
+  Future<List<Interaction>> getContactInteractions(String contactNickname, int page, int size) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/contacts/$contactNickname/interactions?page=$page&size=$size'),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> body = jsonDecode(response.body);
+      List<Interaction> interactions = body
+          .map((dynamic item) => Interaction.fromJson(item))
+          .toList();
+      return interactions;
+    } else {
+      throw Exception('Failed to load interactions for contact: $contactNickname');
+    }
+  }
+
+  Future<void> deleteInteraction(String interactionId) async {
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/interactions/$interactionId'),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+        'Failed to delete interaction. Status code: ${response.statusCode}, Body: ${response.body}',
+      );
+    }
+  }
 }
