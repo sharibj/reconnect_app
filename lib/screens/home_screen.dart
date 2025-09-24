@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           child: ListTile(
                             onTap: () {
-                              _navigateAndRefresh(AddInteractionScreen(preselectedContactNickName: contact.nickName));
+                              _navigateAndRefresh(ViewInteractionsScreen(preselectedContactNickName: contact.nickName));
                             },
                             leading: CircleAvatar(
                               backgroundColor: Colors.amber[700],

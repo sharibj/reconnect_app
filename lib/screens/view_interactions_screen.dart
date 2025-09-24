@@ -3,9 +3,12 @@ import 'package:intl/intl.dart';
 import '../models/contact.dart';
 import '../models/interaction.dart';
 import '../services/api_service.dart';
+import 'add_interaction_screen.dart';
 
 class ViewInteractionsScreen extends StatefulWidget {
-  const ViewInteractionsScreen({super.key});
+  final String? preselectedContactNickName;
+
+  const ViewInteractionsScreen({super.key, this.preselectedContactNickName});
 
   @override
   _ViewInteractionsScreenState createState() => _ViewInteractionsScreenState();
@@ -29,6 +32,12 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
     super.initState();
     _loadContacts();
     _scrollController.addListener(_onScroll);
+
+    // Set the preselected contact if available
+    if (widget.preselectedContactNickName != null) {
+      _selectedContact = widget.preselectedContactNickName;
+      _loadInteractions();
+    }
   }
 
   @override
@@ -110,6 +119,24 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load more interactions: $e')),
       );
+    }
+  }
+
+  void _navigateToAddInteraction() async {
+    if (_selectedContact == null) return;
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddInteractionScreen(
+          preselectedContactNickName: _selectedContact!,
+        ),
+      ),
+    );
+
+    // Refresh interactions list if an interaction was added
+    if (result == true) {
+      _loadInteractions();
     }
   }
 
@@ -336,6 +363,34 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
                 }(),
               ),
             ),
+
+            // Add Interaction Button (only show when contact is selected)
+            if (_selectedContact != null)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _navigateToAddInteraction,
+                  icon: const Icon(Icons.add_circle, color: Colors.white),
+                  label: Text(
+                    'Add Interaction for $_selectedContact',
+                    style: const TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber[700],
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                  ),
+                ),
+              ),
 
             // Interactions List
             Expanded(
