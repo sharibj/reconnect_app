@@ -33,6 +33,8 @@ class _AddInteractionScreenState extends State<AddInteractionScreen> {
       final contacts = await _apiService.getContacts();
       setState(() {
         _contacts = contacts;
+        // Sort contacts alphabetically by nickName
+        _contacts.sort((a, b) => a.nickName.toLowerCase().compareTo(b.nickName.toLowerCase()));
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
