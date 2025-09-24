@@ -91,6 +91,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           child: ListTile(
+                            onTap: () {
+                              _navigateAndRefresh(AddInteractionScreen(preselectedContactNickName: contact.nickName));
+                            },
                             leading: CircleAvatar(
                               backgroundColor: Colors.amber[700],
                               child: Text(

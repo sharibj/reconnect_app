@@ -5,7 +5,9 @@ import '../models/interaction.dart';
 import '../services/api_service.dart';
 
 class AddInteractionScreen extends StatefulWidget {
-  const AddInteractionScreen({super.key});
+  final String? preselectedContactNickName;
+
+  const AddInteractionScreen({super.key, this.preselectedContactNickName});
 
   @override
   _AddInteractionScreenState createState() => _AddInteractionScreenState();
@@ -26,6 +28,7 @@ class _AddInteractionScreenState extends State<AddInteractionScreen> {
   void initState() {
     super.initState();
     _loadContacts();
+    _selectedContact = widget.preselectedContactNickName; // Set the preselected contact if available
   }
 
   void _loadContacts() async {
@@ -33,8 +36,6 @@ class _AddInteractionScreenState extends State<AddInteractionScreen> {
       final contacts = await _apiService.getContacts();
       setState(() {
         _contacts = contacts;
-        // Sort contacts alphabetically by nickName
-        _contacts.sort((a, b) => a.nickName.toLowerCase().compareTo(b.nickName.toLowerCase()));
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
