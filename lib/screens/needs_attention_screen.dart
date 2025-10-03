@@ -79,23 +79,9 @@ class _NeedsAttentionScreenState extends State<NeedsAttentionScreen> {
             SliverAppBar(
               title: const Text('Needs Attention'),
               pinned: true,
-              expandedHeight: 140,
               toolbarHeight: 60,
               forceElevated: innerBoxIsScrolled,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.secondary,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           ];
         },

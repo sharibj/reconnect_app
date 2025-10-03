@@ -52,41 +52,21 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
             SliverAppBar(
               title: const Text('Contacts'),
               pinned: true,
-              expandedHeight: 200,
-              toolbarHeight: 75,
+              toolbarHeight: 90,
               forceElevated: innerBoxIsScrolled,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.secondary,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(110),
+                preferredSize: const Size.fromHeight(50),
                 child: Container(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      _buildSearchBar(),
-                      const SizedBox(height: 12),
-                      TabBar(
-                        controller: _tabController,
-                        labelColor: Colors.white,
-                        unselectedLabelColor: Colors.white70,
-                        indicatorColor: Colors.white,
-                        tabs: const [
-                          Tab(text: 'Contacts', icon: Icon(Icons.people)),
-                          Tab(text: 'Groups', icon: Icon(Icons.group)),
-                        ],
-                      ),
+                  child: TabBar(
+                    controller: _tabController,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white70,
+                    indicatorColor: Colors.white,
+                    tabs: const [
+                      Tab(text: 'Contacts', icon: Icon(Icons.people)),
+                      Tab(text: 'Groups', icon: Icon(Icons.group)),
                     ],
                   ),
                 ),
@@ -118,14 +98,12 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
           onChanged: (value) {
             contactProvider.setSearchQuery(value);
           },
-          style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: 'Search contacts...',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-            prefixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.7)),
+            prefixIcon: const Icon(Icons.search),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
-                    icon: Icon(Icons.clear, color: Colors.white.withOpacity(0.7)),
+                    icon: const Icon(Icons.clear),
                     onPressed: () {
                       _searchController.clear();
                       contactProvider.setSearchQuery('');
@@ -133,7 +111,6 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
                   )
                 : null,
             filled: true,
-            fillColor: Colors.white.withOpacity(0.2),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25),
               borderSide: BorderSide.none,
@@ -168,10 +145,14 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
 
         return Column(
           children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: _buildSearchBar(),
+            ),
             if (contactProvider.groups.isNotEmpty) _buildGroupFilter(),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80), // Added bottom padding for FAB
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 80), // Reduced top padding since search bar is now above
                 itemCount: contacts.length,
                 itemBuilder: (context, index) {
                   final contact = contacts[index];

@@ -39,25 +39,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             SliverAppBar(
               title: const Text('Analytics'),
               pinned: true,
-              expandedHeight: 180,
-              toolbarHeight: 60,
+              toolbarHeight: 100,
               forceElevated: innerBoxIsScrolled,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.secondary,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(70),
+                preferredSize: const Size.fromHeight(50),
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   child: TabBar(
