@@ -56,6 +56,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   Future<void> _checkAuthStatus() async {
+    // Wake up the backend
+    _apiService.wakeUpBackend();
+
     try {
       final isLoggedIn = await _apiService.isLoggedIn();
       setState(() {

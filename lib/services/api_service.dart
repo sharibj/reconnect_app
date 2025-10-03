@@ -229,4 +229,21 @@ class ApiService {
       );
     }
   }
+
+  Future<void> wakeUpBackend() async {
+    try {
+      await http.post(
+        Uri.parse('$_authBaseUrl/login'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          'username': 'dummy',
+          'password': 'dummy'
+        }),
+      );
+    } catch (e) {
+      // Silently ignore wake-up call failures
+    }
+  }
 }
