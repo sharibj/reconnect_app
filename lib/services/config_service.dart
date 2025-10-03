@@ -8,6 +8,8 @@ class ConfigService {
 
     // Use dotenv configuration - this will be set at Docker runtime
     _apiBaseUrl = dotenv.env['API_BASE_URL'] ?? 'http://localhost:8080/api/reconnect';
+    print('🔍 DEBUG ConfigService: API_BASE_URL from .env = ${dotenv.env['API_BASE_URL']}');
+    print('🔍 DEBUG ConfigService: Final apiBaseUrl = $_apiBaseUrl');
     return _apiBaseUrl!;
   }
 

@@ -13,13 +13,28 @@ import 'config_service.dart';
 class ApiService {
   // Get base URLs from ConfigService
   String get _baseUrl => ConfigService.apiBaseUrl;
-  String get _authBaseUrl => ConfigService.apiBaseUrl.replaceAll('/reconnect', '/auth');
+  String get _authBaseUrl {
+    final baseUrl = ConfigService.apiBaseUrl;
+    // More explicit URL construction to avoid string replacement issues
+    if (baseUrl.contains('/api/reconnect')) {
+      // Replace only the last part: /api/reconnect -> /api/auth
+      return baseUrl.substring(0, baseUrl.lastIndexOf('/api/reconnect')) + '/api/auth';
+    } else {
+      // Fallback: extract base domain and add /api/auth
+      final uri = Uri.parse(baseUrl);
+      return '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}/api/auth';
+    }
+  }
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
   static const String _tokenKey = 'jwt_token';
 
   // Authentication methods
   Future<AuthResponse> login(LoginRequest request) async {
+    print('🔍 DEBUG: Base URL: $_baseUrl');
+    print('🔍 DEBUG: Auth URL: $_authBaseUrl');
+    print('🔍 DEBUG: Full login URL: $_authBaseUrl/login');
+
     final response = await http.post(
       Uri.parse('$_authBaseUrl/login'),
       headers: <String, String>{
@@ -38,6 +53,10 @@ class ApiService {
   }
 
   Future<AuthResponse> register(RegisterRequest request) async {
+    print('🔍 DEBUG: Base URL: $_baseUrl');
+    print('🔍 DEBUG: Auth URL: $_authBaseUrl');
+    print('🔍 DEBUG: Full register URL: $_authBaseUrl/register');
+
     final response = await http.post(
       Uri.parse('$_authBaseUrl/register'),
       headers: <String, String>{
