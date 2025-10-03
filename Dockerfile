@@ -12,8 +12,8 @@ RUN flutter pub get
 # Copy the rest of the application
 COPY . .
 
-# Build the web app for production
-RUN flutter build web --release
+# Build the web app for production (disable WASM dry-run to avoid compilation issues)
+RUN flutter build web --release --no-wasm-dry-run
 
 # Stage 2: Serve the app with nginx
 FROM nginx:alpine
