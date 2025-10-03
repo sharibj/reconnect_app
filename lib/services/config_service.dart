@@ -1,15 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:js_interop';
-
-@JS('window.ENV')
-external JSObject? get windowEnv;
-
-@JS()
-@anonymous
-extension type EnvConfig._(JSObject _) implements JSObject {
-  external String? get API_BASE_URL;
-}
+import 'dart:js' as js;
 
 class ConfigService {
   static String? _apiBaseUrl;
@@ -20,15 +11,11 @@ class ConfigService {
     // For web builds, try to get config from runtime environment first
     if (kIsWeb) {
       try {
-        // Try to access window.ENV from the injected env-config.js
-        final env = windowEnv;
-        if (env != null) {
-          final envConfig = env as EnvConfig;
-          final String? runtimeApiUrl = envConfig.API_BASE_URL;
-          if (runtimeApiUrl != null && runtimeApiUrl.isNotEmpty) {
-            _apiBaseUrl = runtimeApiUrl;
-            return _apiBaseUrl!;
-          }
+        // Use the simple window.getApiBaseUrl() function from index.html
+        final runtimeApiUrl = js.context.callMethod('getApiBaseUrl');
+        if (runtimeApiUrl != null && runtimeApiUrl.toString().isNotEmpty) {
+          _apiBaseUrl = runtimeApiUrl.toString();
+          return _apiBaseUrl!;
         }
       } catch (e) {
         print('Warning: Could not read runtime config: $e');
