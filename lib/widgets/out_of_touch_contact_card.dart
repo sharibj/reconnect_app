@@ -79,8 +79,27 @@ class OutOfTouchContactCard extends StatelessWidget {
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
+            child: _buildCardContent(context),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardContent(BuildContext context) {
+    final urgencyColor = _getUrgencyColor();
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
+    if (isSmallScreen) {
+      return _buildMobileLayout(context, urgencyColor);
+    } else {
+      return _buildDesktopLayout(context, urgencyColor);
+    }
+  }
+
+  Widget _buildDesktopLayout(BuildContext context, Color urgencyColor) {
+    return Row(
+      children: [
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -186,11 +205,131 @@ class OutOfTouchContactCard extends StatelessWidget {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-              ],
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context, Color urgencyColor) {
+    return Column(
+      children: [
+        // First row: Avatar, Name, and Status Badge
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
+                  ],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                contact.nickName.isNotEmpty ? contact.nickName[0].toUpperCase() : '?',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                contact.nickName,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    urgencyColor.withValues(alpha: 0.1),
+                    urgencyColor.withValues(alpha: 0.2),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: urgencyColor.withValues(alpha: 0.4),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                contact.overdueStatus.status,
+                style: TextStyle(
+                  color: urgencyColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
+        const SizedBox(height: 12),
+        // Second row: Group and Last Contact info
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Group: ${contact.group}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _getLastContactText(),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: urgencyColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                  ],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 12,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
