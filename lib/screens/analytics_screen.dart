@@ -5,6 +5,7 @@ import '../providers/analytics_provider.dart';
 import '../providers/contact_provider.dart';
 import '../providers/interaction_provider.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/out_of_touch_contact_card.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -402,67 +403,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                     ),
                   )
                 else
-                  ...outOfTouchContacts.take(5).map((contact) {
-                    final overdueStatus = contact.overdueStatus;
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: overdueStatus.color.withOpacity(0.3),
-                        ),
-                        color: overdueStatus.color.withOpacity(0.05),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 16,
-                            backgroundColor: overdueStatus.color,
-                            child: Text(
-                              contact.nickName.isNotEmpty
-                                  ? contact.nickName[0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  contact.nickName,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  contact.group,
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Chip(
-                            label: Text(
-                              overdueStatus.status,
-                              style: TextStyle(
-                                color: overdueStatus.color,
-                                fontSize: 10,
-                              ),
-                            ),
-                            backgroundColor: overdueStatus.color.withOpacity(0.1),
-                            side: BorderSide.none,
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
+                  ...outOfTouchContacts.take(5).map((contact) => OutOfTouchContactCard(contact: contact)),
                 if (outOfTouchContacts.length > 5)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),

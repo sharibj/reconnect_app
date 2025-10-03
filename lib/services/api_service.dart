@@ -294,31 +294,55 @@ class ApiService {
   // Group CRUD operations
   Future<Group> updateGroup(String name, Group group) async {
     final headers = await _getAuthHeaders();
+
+    print('🔍 DEBUG: Updating group - URL: $_baseUrl/groups/$name');
+    print('🔍 DEBUG: Original group data: ${jsonEncode(group.toJson())}');
+
+    // Send the complete group object like other PUT requests
     final response = await http.put(
-      Uri.parse('$_baseUrl/groups/$name'),
+      Uri.parse('$_baseUrl/groups/${Uri.encodeComponent(name)}'),
       headers: headers,
       body: jsonEncode(group.toJson()),
     );
 
+    print('🔍 DEBUG: Update response status: ${response.statusCode}');
+    print('🔍 DEBUG: Update response body: ${response.body}');
+
     if (response.statusCode == 200) {
-      return group;
+      // Handle empty response body from backend
+      if (response.body.isEmpty) {
+        return group; // Return the updated group object we sent
+      }
+      try {
+        return Group.fromJson(jsonDecode(response.body));
+      } catch (e) {
+        print('🔍 DEBUG: Failed to parse response JSON: $e');
+        // If JSON parsing fails, return the group object we sent
+        return group;
+      }
     } else {
       throw Exception(
-        'Failed to update group. Status code: ${response.statusCode}',
+        'Failed to update group. Status code: ${response.statusCode}, Response: ${response.body}',
       );
     }
   }
 
   Future<void> deleteGroup(String name) async {
     final headers = await _getAuthHeaders();
+
+    print('🔍 DEBUG: Deleting group - URL: $_baseUrl/groups/${Uri.encodeComponent(name)}');
+
     final response = await http.delete(
-      Uri.parse('$_baseUrl/groups/$name'),
+      Uri.parse('$_baseUrl/groups/${Uri.encodeComponent(name)}'),
       headers: headers,
     );
 
+    print('🔍 DEBUG: Delete response status: ${response.statusCode}');
+    print('🔍 DEBUG: Delete response body: ${response.body}');
+
     if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception(
-        'Failed to delete group. Status code: ${response.statusCode}',
+        'Failed to delete group. Status code: ${response.statusCode}, Response: ${response.body}',
       );
     }
   }

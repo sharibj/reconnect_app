@@ -12,6 +12,7 @@ import '../providers/analytics_provider.dart';
 import '../providers/contact_provider.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/app_logo.dart';
+import '../widgets/out_of_touch_contact_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -428,7 +429,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   )
                 else
-                  ...outOfTouchContacts.take(5).map((contact) => _buildOutOfTouchCard(contact)),
+                  ...outOfTouchContacts.take(5).map((contact) => OutOfTouchContactCard(
+                    contact: contact,
+                    onTap: () => _navigateAndRefresh(ViewInteractionsScreen(preselectedContactNickName: contact.nickName)),
+                  )),
               ],
             ),
           ),
@@ -437,136 +441,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildOutOfTouchCard(ReconnectModel contact) {
-    final overdueStatus = contact.overdueStatus;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 4,
-      shadowColor: overdueStatus.color.withValues(alpha: 0.2),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.surface,
-              Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: overdueStatus.color.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              _navigateAndRefresh(ViewInteractionsScreen(preselectedContactNickName: contact.nickName));
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          overdueStatus.color,
-                          overdueStatus.color.withValues(alpha: 0.8),
-                        ],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: overdueStatus.color.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      contact.nickName.isNotEmpty ? contact.nickName[0].toUpperCase() : '?',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          contact.nickName,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          contact.group,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          overdueStatus.color.withValues(alpha: 0.15),
-                          overdueStatus.color.withValues(alpha: 0.25),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: overdueStatus.color.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      overdueStatus.status,
-                      style: TextStyle(
-                        color: overdueStatus.color,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

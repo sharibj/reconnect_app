@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/contact_provider.dart';
 import '../widgets/loading_widget.dart';
+import '../models/group.dart';
 import 'add_contact_screen.dart';
 import 'add_group_screen.dart';
+import 'edit_group_screen.dart';
 import 'contact_detail_screen.dart';
+import '../services/api_service.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -60,7 +63,7 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
                 ),
               ),
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(100),
+                preferredSize: const Size.fromHeight(110),
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -441,10 +444,36 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                        PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _editGroup(group);
+                            } else if (value == 'delete') {
+                              _deleteGroup(group);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit_rounded),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete_rounded, color: Colors.red),
+                                  SizedBox(width: 8),
+                                  Text('Delete'),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -577,6 +606,73 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
     );
     if (result == true) {
       context.read<ContactProvider>().loadContacts();
+    }
+  }
+
+  void _editGroup(Group group) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditGroupScreen(group: group),
+      ),
+    );
+    if (result == true) {
+      context.read<ContactProvider>().loadGroups();
+      context.read<ContactProvider>().loadContacts();
+    }
+  }
+
+  void _deleteGroup(Group group) async {
+    final bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Group'),
+          content: Text(
+            'Are you sure you want to delete the group "${group.name}"? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      try {
+        final apiService = ApiService();
+        await apiService.deleteGroup(group.name);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Group deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          context.read<ContactProvider>().loadGroups();
+          context.read<ContactProvider>().loadContacts();
+        }
+      } catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete group: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 }
