@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'screens/home_screen.dart';
+import 'package:provider/provider.dart';
+import 'screens/main_navigation.dart';
 import 'screens/login_screen.dart';
 import 'services/api_service.dart';
+import 'theme/app_theme.dart';
+import 'providers/theme_provider.dart';
+import 'providers/contact_provider.dart';
+import 'providers/interaction_provider.dart';
+import 'providers/analytics_provider.dart';
 
 // To set up flutter_dotenv:
 // 1. Add `flutter_dotenv: ^5.2.1` to your `pubspec.yaml` dependencies.
@@ -26,13 +32,25 @@ class ReconnectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Reconnect App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ContactProvider()),
+        ChangeNotifierProvider(create: (_) => InteractionProvider()),
+        ChangeNotifierProvider(create: (_) => AnalyticsProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Reconnect',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const AuthWrapper(),
+          );
+        },
       ),
-      home: const AuthWrapper(),
     );
   }
 }
@@ -84,6 +102,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
       );
     }
 
-    return _isLoggedIn ? const HomeScreen() : const LoginScreen();
+    return _isLoggedIn ? const MainNavigation() : const LoginScreen();
   }
 }

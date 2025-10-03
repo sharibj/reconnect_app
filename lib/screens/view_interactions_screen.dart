@@ -4,6 +4,7 @@ import '../models/contact.dart';
 import '../models/interaction.dart';
 import '../services/api_service.dart';
 import 'add_interaction_screen.dart';
+import 'edit_interaction_screen.dart';
 
 class ViewInteractionsScreen extends StatefulWidget {
   final String? preselectedContactNickName;
@@ -36,8 +37,10 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
     // Set the preselected contact if available
     if (widget.preselectedContactNickName != null) {
       _selectedContact = widget.preselectedContactNickName;
-      _loadInteractions();
     }
+
+    // Always load interactions (all interactions if no contact selected)
+    _loadInteractions();
   }
 
   @override
@@ -66,8 +69,6 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
   }
 
   void _loadInteractions() async {
-    if (_selectedContact == null) return;
-
     setState(() {
       _isLoading = true;
       _interactions.clear();
@@ -76,7 +77,15 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
     });
 
     try {
-      final interactions = await _apiService.getContactInteractions(_selectedContact!, _currentPage, _pageSize);
+      final List<Interaction> interactions;
+      if (_selectedContact == null) {
+        // Load all interactions when no contact is selected
+        interactions = await _apiService.getAllInteractions(page: _currentPage, size: _pageSize);
+      } else {
+        // Load interactions for specific contact
+        interactions = await _apiService.getContactInteractions(_selectedContact!, _currentPage, _pageSize);
+      }
+
       setState(() {
         _interactions = interactions;
         _isLoading = false;
@@ -93,18 +102,25 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
   }
 
   void _loadMoreInteractions() async {
-    if (_selectedContact == null || _isLoadingMore || !_hasMoreData) return;
+    if (_isLoadingMore || !_hasMoreData) return;
 
     setState(() {
       _isLoadingMore = true;
     });
 
     try {
-      final moreInteractions = await _apiService.getContactInteractions(
-        _selectedContact!,
-        _currentPage + 1,
-        _pageSize
-      );
+      final List<Interaction> moreInteractions;
+      if (_selectedContact == null) {
+        // Load more from all interactions
+        moreInteractions = await _apiService.getAllInteractions(page: _currentPage + 1, size: _pageSize);
+      } else {
+        // Load more for specific contact
+        moreInteractions = await _apiService.getContactInteractions(
+          _selectedContact!,
+          _currentPage + 1,
+          _pageSize
+        );
+      }
 
       setState(() {
         _interactions.addAll(moreInteractions);
@@ -135,6 +151,22 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
     );
 
     // Refresh interactions list if an interaction was added
+    if (result == true) {
+      _loadInteractions();
+    }
+  }
+
+  void _editInteraction(Interaction interaction) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditInteractionScreen(
+          interaction: interaction,
+        ),
+      ),
+    );
+
+    // Refresh interactions list if the interaction was updated
     if (result == true) {
       _loadInteractions();
     }
@@ -203,85 +235,301 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
     }
   }
 
-  Widget _buildInteractionCard(Interaction interaction, int index) {
-    final DateTime date = interaction.timeStamp;
-    final String formattedDate = DateFormat.yMMMd().add_jm().format(date);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: const Text('View Interactions'),
+            floating: true,
+            pinned: true,
+            expandedHeight: 120,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // Contact Selection Card
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Select Contact',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: _selectedContact,
+                          hint: const Text('Select a contact to view interactions'),
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.person_outline_rounded),
+                            filled: true,
+                            labelText: 'Contact',
+                          ),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedContact = newValue;
+                            });
+                            _loadInteractions();
+                          },
+                          items: () {
+                            final sortedContacts = List<Contact>.from(_contacts)
+                              ..sort((a, b) => a.nickName.toLowerCase().compareTo(b.nickName.toLowerCase()));
+
+                            return sortedContacts.map<DropdownMenuItem<String>>((Contact contact) {
+                              return DropdownMenuItem<String>(
+                                value: contact.nickName,
+                                child: Text(contact.nickName),
+                              );
+                            }).toList();
+                          }(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Add Interaction Button
+                if (_selectedContact != null)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _navigateToAddInteraction,
+                          icon: const Icon(Icons.add_rounded),
+                          label: Text('Add Interaction for $_selectedContact'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                // Interactions Display
+                if (_isLoading)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  )
+                else if (_interactions.isEmpty)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No Interactions Yet',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _selectedContact == null
+                              ? 'No interactions have been logged yet. Add some contacts and start logging your conversations!'
+                              : 'Start logging conversations with $_selectedContact',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  // Interactions List
+                  ..._interactions.map((interaction) => _buildModernInteractionCard(interaction)).toList(),
+
+                // Loading more indicator
+                if (_isLoadingMore)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+              ]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernInteractionCard(Interaction interaction) {
+    final interactionDate = DateFormat('MMM dd, yyyy').format(interaction.timeStamp);
+    final interactionTime = DateFormat('HH:mm').format(interaction.timeStamp);
 
     return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.amber[700]?.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    color: interaction.interactionDetails.selfInitiated
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    _getInteractionIcon(interaction.interactionDetails.type),
+                    color: interaction.interactionDetails.selfInitiated
+                        ? Colors.green
+                        : Colors.blue,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_selectedContact == null) ...[
+                        Text(
+                          interaction.contact,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          interaction.interactionDetails.type,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ] else
+                        Text(
+                          interaction.interactionDetails.type,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      Text(
+                        '$interactionDate at $interactionTime',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: interaction.interactionDetails.selfInitiated
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : Colors.blue.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    interaction.interactionDetails.type,
+                    interaction.interactionDetails.selfInitiated
+                        ? 'You initiated'
+                        : 'They initiated',
                     style: TextStyle(
-                      color: Colors.amber[700],
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Montserrat',
-                      fontSize: 12,
+                      color: interaction.interactionDetails.selfInitiated
+                          ? Colors.green
+                          : Colors.blue,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      interaction.interactionDetails.selfInitiated
-                        ? 'Initiated by me'
-                        : 'They initiated',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: interaction.interactionDetails.selfInitiated
-                          ? Colors.green
-                          : Colors.blue,
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w500,
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'edit' && interaction.id != null) {
+                      _editInteraction(interaction);
+                    } else if (value == 'delete' && interaction.id != null) {
+                      final index = _interactions.indexOf(interaction);
+                      if (index != -1) {
+                        _deleteInteraction(interaction, index);
+                      }
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_rounded),
+                          SizedBox(width: 8),
+                          Text('Edit'),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () => _deleteInteraction(interaction, index),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(
-                          Icons.delete_outline,
-                          size: 18,
-                          color: Colors.red[400],
-                        ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_rounded, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Delete'),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              formattedDate,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-                fontFamily: 'Montserrat',
-              ),
-            ),
             if (interaction.notes.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Text(
-                interaction.notes,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Montserrat',
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  interaction.notes,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
             ],
@@ -291,159 +539,20 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'View Interactions',
-          style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            letterSpacing: 1.2,
-          ),
-        ),
-        backgroundColor: Colors.amber[700],
-        elevation: 2,
-      ),
-      body: Container(
-        color: Colors.amber[50],
-        child: Column(
-          children: [
-            // Contact Selection Dropdown
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.2),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: DropdownButtonFormField<String>(
-                value: _selectedContact,
-                hint: const Text(
-                  'Select a contact to view interactions',
-                  style: TextStyle(fontFamily: 'Montserrat'),
-                ),
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.person_outline),
-                  border: OutlineInputBorder(),
-                  labelText: 'Contact',
-                ),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Montserrat',
-                  color: Colors.black87,
-                ),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedContact = newValue;
-                  });
-                  _loadInteractions();
-                },
-                items: () {
-                  // Create a sorted copy of contacts for the dropdown
-                  final sortedContacts = List<Contact>.from(_contacts)
-                    ..sort((a, b) => a.nickName.toLowerCase().compareTo(b.nickName.toLowerCase()));
-
-                  return sortedContacts.map<DropdownMenuItem<String>>((Contact contact) {
-                    return DropdownMenuItem<String>(
-                      value: contact.nickName,
-                      child: Text(contact.nickName),
-                    );
-                  }).toList();
-                }(),
-              ),
-            ),
-
-            // Add Interaction Button (only show when contact is selected)
-            if (_selectedContact != null)
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _navigateToAddInteraction,
-                  icon: const Icon(Icons.add_circle, color: Colors.white),
-                  label: Text(
-                    'Add Interaction for $_selectedContact',
-                    style: const TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber[700],
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 4,
-                  ),
-                ),
-              ),
-
-            // Interactions List
-            Expanded(
-              child: _selectedContact == null
-                  ? const Center(
-                      child: Text(
-                        'Please select a contact to view interactions',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontFamily: 'Montserrat',
-                          color: Colors.grey,
-                        ),
-                      ),
-                    )
-                  : _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.amber,
-                          ),
-                        )
-                      : _interactions.isEmpty
-                          ? const Center(
-                              child: Text(
-                                'No interactions found for this contact',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontFamily: 'Montserrat',
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            )
-                          : ListView.builder(
-                              controller: _scrollController,
-                              itemCount: _interactions.length + (_isLoadingMore ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index == _interactions.length) {
-                                  // Loading indicator at the bottom
-                                  return const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: CircularProgressIndicator(
-                                        color: Colors.amber,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                return _buildInteractionCard(_interactions[index], index);
-                              },
-                            ),
-            ),
-          ],
-        ),
-      ),
-    );
+  IconData _getInteractionIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'audio call':
+        return Icons.phone_rounded;
+      case 'video call':
+        return Icons.videocam_rounded;
+      case 'text':
+        return Icons.message_rounded;
+      case 'social media':
+        return Icons.share_rounded;
+      case 'in person':
+        return Icons.person_rounded;
+      default:
+        return Icons.chat_rounded;
+    }
   }
 }

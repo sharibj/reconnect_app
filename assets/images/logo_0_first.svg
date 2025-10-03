@@ -1,0 +1,85 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C3AED;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="secondaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06B6D4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#primaryGradient)" stroke="none"/>
+
+  <!-- Connection Lines (representing relationships) -->
+  <g stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none">
+    <!-- Curved connection lines -->
+    <path d="M60 80 Q100 60 140 80" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+    <path d="M50 110 Q100 90 150 110" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+    <path d="M70 140 Q100 120 130 140" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Central Hub (representing the user) -->
+  <circle cx="100" cy="100" r="25" fill="white" stroke="none" filter="url(#glow)"/>
+
+  <!-- People Icons (contacts) -->
+  <!-- Top Person -->
+  <g transform="translate(100, 45)">
+    <circle cx="0" cy="0" r="15" fill="url(#secondaryGradient)"/>
+    <circle cx="0" cy="-3" r="4" fill="white"/>
+    <path d="M-6 8 Q0 3 6 8" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Right Person -->
+  <g transform="translate(155, 100)">
+    <circle cx="0" cy="0" r="15" fill="url(#secondaryGradient)"/>
+    <circle cx="0" cy="-3" r="4" fill="white"/>
+    <path d="M-6 8 Q0 3 6 8" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Bottom Person -->
+  <g transform="translate(100, 155)">
+    <circle cx="0" cy="0" r="15" fill="url(#secondaryGradient)"/>
+    <circle cx="0" cy="-3" r="4" fill="white"/>
+    <path d="M-6 8 Q0 3 6 8" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Left Person -->
+  <g transform="translate(45, 100)">
+    <circle cx="0" cy="0" r="15" fill="url(#secondaryGradient)"/>
+    <circle cx="0" cy="-3" r="4" fill="white"/>
+    <path d="M-6 8 Q0 3 6 8" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Center Icon (chat/connection symbol) -->
+  <g transform="translate(100, 100)">
+    <!-- Chat bubble -->
+    <path d="M-10 -8 L10 -8 Q12 -8 12 -6 L12 4 Q12 6 10 6 L-6 6 L-10 10 L-10 6 Q-12 6 -12 4 L-12 -6 Q-12 -8 -10 -8 Z"
+          fill="#7C3AED" stroke="none"/>
+    <!-- Message dots -->
+    <circle cx="-4" cy="-1" r="1.5" fill="white"/>
+    <circle cx="0" cy="-1" r="1.5" fill="white"/>
+    <circle cx="4" cy="-1" r="1.5" fill="white"/>
+  </g>
+
+  <!-- Connection Lines from center to contacts -->
+  <g stroke="rgba(255,255,255,0.6)" stroke-width="2" fill="none">
+    <line x1="100" y1="75" x2="100" y2="60"/>
+    <line x1="125" y1="100" x2="140" y2="100"/>
+    <line x1="100" y1="125" x2="100" y2="140"/>
+    <line x1="75" y1="100" x2="60" y2="100"/>
+  </g>
+
+  <!-- Pulse effect circles (animation-ready) -->
+  <circle cx="100" cy="100" r="35" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" opacity="0.5"/>
+  <circle cx="100" cy="100" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" opacity="0.3"/>
+</svg>

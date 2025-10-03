@@ -6,7 +6,7 @@ class AddGroupScreen extends StatefulWidget {
   const AddGroupScreen({super.key});
 
   @override
-  _AddGroupScreenState createState() => _AddGroupScreenState();
+  State<AddGroupScreen> createState() => _AddGroupScreenState();
 }
 
 class _AddGroupScreenState extends State<AddGroupScreen> {
@@ -44,27 +44,36 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Add Group',
-          style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            letterSpacing: 1.2,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.amber[700],
-        elevation: 2,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: Container(
-        color: Colors.amber[50],
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(16.0),
           child: Card(
             elevation: 8,
+            shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -74,11 +83,9 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                       controller: _nameController,
                       decoration: const InputDecoration(
                         labelText: 'Group Name',
-                        prefixIcon: Icon(Icons.group),
-                        labelStyle: TextStyle(fontFamily: 'Montserrat'),
-                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.group_rounded),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a group name';
@@ -92,47 +99,27 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Frequency in Days',
                         prefixIcon: Icon(Icons.calendar_today_outlined),
-                        border: OutlineInputBorder(),
+                        filled: true,
                       ),
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 32),
                     SizedBox(
                       width: double.infinity,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Colors.amber[700],
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.amber[700]!.withOpacity(0.18),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton.icon(
-                          onPressed: _submitForm,
-                          icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-                          label: const Text(
-                            'Add Group',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              letterSpacing: 1.1,
-                              color: Colors.white,
-                            ),
+                      child: FilledButton.icon(
+                        onPressed: _submitForm,
+                        icon: const Icon(Icons.group_add_rounded),
+                        label: Text(
+                          'Add Group',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 0,
+                        ),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                       ),

@@ -1,0 +1,59 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C3AED;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#EF4444;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F97316;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="url(#grad3)" stroke="none"/>
+
+  <!-- Connection hearts floating around -->
+  <g fill="rgba(255,255,255,0.3)">
+    <!-- Small hearts -->
+    <path d="M70 70 C65 65, 55 65, 55 75 C55 65, 45 65, 40 70 C40 80, 55 95, 55 95 C55 95, 70 80, 70 70 Z" transform="scale(0.3)"/>
+    <path d="M70 70 C65 65, 55 65, 55 75 C55 65, 45 65, 40 70 C40 80, 55 95, 55 95 C55 95, 70 80, 70 70 Z" transform="translate(120,20) scale(0.3)"/>
+    <path d="M70 70 C65 65, 55 65, 55 75 C55 65, 45 65, 40 70 C40 80, 55 95, 55 95 C55 95, 70 80, 70 70 Z" transform="translate(140,120) scale(0.3)"/>
+    <path d="M70 70 C65 65, 55 65, 55 75 C55 65, 45 65, 40 70 C40 80, 55 95, 55 95 C55 95, 70 80, 70 70 Z" transform="translate(30,140) scale(0.3)"/>
+  </g>
+
+  <!-- Main central heart -->
+  <path d="M100 120 C85 105, 65 105, 65 125 C65 105, 45 105, 30 120 C30 140, 65 175, 100 175 C135 175, 170 140, 170 120 C170 105, 150 105, 135 125 C135 105, 115 105, 100 120 Z"
+        fill="url(#heartGrad)" transform="translate(0,-30) scale(0.8)"/>
+
+  <!-- Connecting people icons -->
+  <g fill="white">
+    <!-- Top person -->
+    <circle cx="100" cy="50" r="8"/>
+    <circle cx="100" cy="46" r="3"/>
+    <path d="M95 52 Q100 49 105 52" stroke="white" stroke-width="1.5" fill="none"/>
+
+    <!-- Right person -->
+    <circle cx="150" cy="100" r="8"/>
+    <circle cx="150" cy="96" r="3"/>
+    <path d="M145 102 Q150 99 155 102" stroke="white" stroke-width="1.5" fill="none"/>
+
+    <!-- Bottom person -->
+    <circle cx="100" cy="150" r="8"/>
+    <circle cx="100" cy="146" r="3"/>
+    <path d="M95 152 Q100 149 105 152" stroke="white" stroke-width="1.5" fill="none"/>
+
+    <!-- Left person -->
+    <circle cx="50" cy="100" r="8"/>
+    <circle cx="50" cy="96" r="3"/>
+    <path d="M45 102 Q50 99 55 102" stroke="white" stroke-width="1.5" fill="none"/>
+  </g>
+
+  <!-- Connection lines to heart -->
+  <g stroke="rgba(255,255,255,0.6)" stroke-width="2" fill="none">
+    <line x1="100" y1="58" x2="100" y2="85"/>
+    <line x1="142" y1="100" x2="115" y2="100"/>
+    <line x1="100" y1="142" x2="100" y2="115"/>
+    <line x1="58" y1="100" x2="85" y2="100"/>
+  </g>
+</svg>

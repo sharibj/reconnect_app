@@ -1,0 +1,33 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C3AED;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Simple circular background -->
+  <circle cx="100" cy="100" r="95" fill="url(#grad1)" stroke="none"/>
+
+  <!-- Minimalist connection symbol - larger and more prominent -->
+  <g stroke="white" stroke-width="6" fill="none" stroke-linecap="round">
+    <!-- Connection arcs - expanded to fill more space -->
+    <path d="M100 35 Q65 65 100 100 Q135 65 100 35" stroke="rgba(255,255,255,0.8)"/>
+    <path d="M165 100 Q135 135 100 100 Q135 65 165 100" stroke="rgba(255,255,255,0.8)"/>
+    <path d="M100 165 Q135 135 100 100 Q65 135 100 165" stroke="rgba(255,255,255,0.8)"/>
+    <path d="M35 100 Q65 65 100 100 Q65 135 35 100" stroke="rgba(255,255,255,0.8)"/>
+  </g>
+
+  <!-- Central dot - larger -->
+  <circle cx="100" cy="100" r="12" fill="white"/>
+
+  <!-- Connection dots - larger and positioned further out -->
+  <circle cx="100" cy="35" r="10" fill="white" opacity="0.95"/>
+  <circle cx="165" cy="100" r="10" fill="white" opacity="0.95"/>
+  <circle cx="100" cy="165" r="10" fill="white" opacity="0.95"/>
+  <circle cx="35" cy="100" r="10" fill="white" opacity="0.95"/>
+
+  <!-- Additional subtle connection rings around center -->
+  <circle cx="100" cy="100" r="25" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+</svg>

@@ -28,6 +28,7 @@ class ApiService {
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
   static const String _tokenKey = 'jwt_token';
+  static const String _usernameKey = 'username';
 
   // Authentication methods
   Future<AuthResponse> login(LoginRequest request) async {
@@ -46,6 +47,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
       await _storage.write(key: _tokenKey, value: authResponse.token);
+      await _storage.write(key: _usernameKey, value: authResponse.username);
       return authResponse;
     } else {
       throw Exception('Failed to login. Status code: ${response.statusCode}');
@@ -68,6 +70,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
       await _storage.write(key: _tokenKey, value: authResponse.token);
+      await _storage.write(key: _usernameKey, value: authResponse.username);
       return authResponse;
     } else {
       throw Exception('Failed to register. Status code: ${response.statusCode}');
@@ -76,10 +79,15 @@ class ApiService {
 
   Future<void> logout() async {
     await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: _usernameKey);
   }
 
   Future<String?> getToken() async {
     return await _storage.read(key: _tokenKey);
+  }
+
+  Future<String?> getUsername() async {
+    return await _storage.read(key: _usernameKey);
   }
 
   Future<bool> isLoggedIn() async {
@@ -216,6 +224,24 @@ class ApiService {
     }
   }
 
+  Future<List<Interaction>> getAllInteractions({int page = 0, int size = 100}) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.get(
+      Uri.parse('$_baseUrl/interactions?page=$page&size=$size'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> body = jsonDecode(response.body);
+      List<Interaction> interactions = body
+          .map((dynamic item) => Interaction.fromJson(item))
+          .toList();
+      return interactions;
+    } else {
+      throw Exception('Failed to load all interactions');
+    }
+  }
+
   Future<void> deleteInteraction(String interactionId) async {
     final headers = await _getAuthHeaders();
     final response = await http.delete(
@@ -226,6 +252,91 @@ class ApiService {
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception(
         'Failed to delete interaction. Status code: ${response.statusCode}, Body: ${response.body}',
+      );
+    }
+  }
+
+  // Contact CRUD operations
+  Future<Contact> updateContact(String nickName, Contact contact) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.put(
+      Uri.parse('$_baseUrl/contacts/$nickName'),
+      headers: headers,
+      body: jsonEncode({
+        'group': contact.group,
+        'details': contact.details.toJson(),
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return Contact.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception(
+        'Failed to update contact. Status code: ${response.statusCode}',
+      );
+    }
+  }
+
+  Future<void> deleteContact(String nickName) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/contacts/$nickName'),
+      headers: headers,
+    );
+
+    if (response.statusCode != 204 && response.statusCode != 200) {
+      throw Exception(
+        'Failed to delete contact. Status code: ${response.statusCode}',
+      );
+    }
+  }
+
+  // Group CRUD operations
+  Future<Group> updateGroup(String name, Group group) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.put(
+      Uri.parse('$_baseUrl/groups/$name'),
+      headers: headers,
+      body: jsonEncode(group.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      return group;
+    } else {
+      throw Exception(
+        'Failed to update group. Status code: ${response.statusCode}',
+      );
+    }
+  }
+
+  Future<void> deleteGroup(String name) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/groups/$name'),
+      headers: headers,
+    );
+
+    if (response.statusCode != 204 && response.statusCode != 200) {
+      throw Exception(
+        'Failed to delete group. Status code: ${response.statusCode}',
+      );
+    }
+  }
+
+  // Interaction CRUD operations
+  Future<Interaction> updateInteraction(String interactionId, Interaction interaction) async {
+    final headers = await _getAuthHeaders();
+    final response = await http.put(
+      Uri.parse('$_baseUrl/interactions/$interactionId'),
+      headers: headers,
+      body: jsonEncode(interaction.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      return interaction;
+    } else {
+      throw Exception(
+        'Failed to update interaction. Status code: ${response.statusCode}',
       );
     }
   }

@@ -7,7 +7,7 @@ class AddContactScreen extends StatefulWidget {
   const AddContactScreen({super.key});
 
   @override
-  _AddContactScreenState createState() => _AddContactScreenState();
+  State<AddContactScreen> createState() => _AddContactScreenState();
 }
 
 class _AddContactScreenState extends State<AddContactScreen> {
@@ -94,30 +94,38 @@ class _AddContactScreenState extends State<AddContactScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Add Contact',
-          style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            letterSpacing: 1.2,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.amber[700],
-        elevation: 2,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: Container(
-        color: Colors.amber[50],
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(16.0),
           child: Card(
             elevation: 8,
+            shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _formKey,
                 child: ListView(
@@ -126,11 +134,9 @@ class _AddContactScreenState extends State<AddContactScreen> {
                       controller: _nickNameController,
                       decoration: const InputDecoration(
                         labelText: 'Nickname',
-                        prefixIcon: Icon(Icons.person_outline),
-                        labelStyle: TextStyle(fontFamily: 'Montserrat'),
-                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person_outline_rounded),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a nickname';
@@ -140,13 +146,13 @@ class _AddContactScreenState extends State<AddContactScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _selectedGroup,
-                      hint: const Text('Select Group', style: TextStyle(fontFamily: 'Montserrat')),
+                      initialValue: _selectedGroup,
+                      hint: const Text('Select Group'),
                       decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.group),
-                        border: OutlineInputBorder(),
+                        labelText: 'Group',
+                        prefixIcon: Icon(Icons.group_rounded),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat', color: Colors.black87),
                       onChanged: (String? newValue) {
                         setState(() {
                           _selectedGroup = newValue;
@@ -166,9 +172,8 @@ class _AddContactScreenState extends State<AddContactScreen> {
                       decoration: const InputDecoration(
                         labelText: 'First Name',
                         prefixIcon: Icon(Icons.badge_outlined),
-                        border: OutlineInputBorder(),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -176,9 +181,8 @@ class _AddContactScreenState extends State<AddContactScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Last Name',
                         prefixIcon: Icon(Icons.badge),
-                        border: OutlineInputBorder(),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -186,9 +190,9 @@ class _AddContactScreenState extends State<AddContactScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Notes',
                         prefixIcon: Icon(Icons.note_alt_outlined),
-                        border: OutlineInputBorder(),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                      maxLines: 3,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -196,9 +200,9 @@ class _AddContactScreenState extends State<AddContactScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         prefixIcon: Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                      keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -206,9 +210,9 @@ class _AddContactScreenState extends State<AddContactScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Phone',
                         prefixIcon: Icon(Icons.phone_outlined),
-                        border: OutlineInputBorder(),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                      keyboardType: TextInputType.phone,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -216,46 +220,27 @@ class _AddContactScreenState extends State<AddContactScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Address',
                         prefixIcon: Icon(Icons.home_outlined),
-                        border: OutlineInputBorder(),
+                        filled: true,
                       ),
-                      style: const TextStyle(fontSize: 18, fontFamily: 'Montserrat'),
+                      maxLines: 2,
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 32),
                     SizedBox(
                       width: double.infinity,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Colors.amber[700],
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.amber[700]!.withOpacity(0.18),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton.icon(
-                          onPressed: _submitForm,
-                          icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-                          label: const Text(
-                            'Add Contact',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              letterSpacing: 1.1,
-                              color: Colors.white,
-                            ),
+                      child: FilledButton.icon(
+                        onPressed: _submitForm,
+                        icon: const Icon(Icons.person_add_rounded),
+                        label: Text(
+                          'Add Contact',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 0,
+                        ),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                       ),

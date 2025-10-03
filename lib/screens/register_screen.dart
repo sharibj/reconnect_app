@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/auth.dart';
 import '../services/api_service.dart';
-import 'home_screen.dart';
+import '../widgets/app_logo.dart';
+import 'main_navigation.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -48,7 +49,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const MainNavigation()),
         );
       }
     } catch (e) {
@@ -72,27 +73,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amber[50],
-      appBar: AppBar(
-        backgroundColor: Colors.amber[700],
-        title: const Text(
-          'Create Account',
-          style: TextStyle(
-            color: Colors.white,
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+            ],
           ),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: SafeArea(
+        child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Card(
-              elevation: 8,
+              elevation: 20,
+              shadowColor: Colors.black.withOpacity(0.3),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(24),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(32.0),
@@ -101,37 +101,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      const AppLogo(
+                        size: 100,
+                        showShadow: true,
+                      ),
+                      const SizedBox(height: 24),
                       Text(
                         'Join Reconnect',
-                        style: TextStyle(
-                          fontSize: 28,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.amber[700],
-                          fontFamily: 'Montserrat',
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Create your account to get started',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                          fontFamily: 'Montserrat',
+                        'Create your account to start connecting',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                         ),
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
                       TextFormField(
                         controller: _usernameController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Username',
-                          prefixIcon: const Icon(Icons.person),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.amber[700]!),
-                          ),
+                          prefixIcon: Icon(Icons.person_outline_rounded),
+                          filled: true,
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -147,16 +143,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Email',
-                          prefixIcon: const Icon(Icons.email),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.amber[700]!),
-                          ),
+                          prefixIcon: Icon(Icons.email_outlined),
+                          filled: true,
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -174,10 +164,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock),
+                          prefixIcon: const Icon(Icons.lock_outline_rounded),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                             ),
                             onPressed: () {
                               setState(() {
@@ -185,13 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               });
                             },
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.amber[700]!),
-                          ),
+                          filled: true,
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -209,10 +193,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         obscureText: _obscureConfirmPassword,
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
+                          prefixIcon: const Icon(Icons.lock_outline_rounded),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                              _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                             ),
                             onPressed: () {
                               setState(() {
@@ -220,13 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               });
                             },
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.amber[700]!),
-                          ),
+                          filled: true,
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -241,25 +219,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton(
+                        child: FilledButton(
                           onPressed: _isLoading ? null : _register,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber[700],
+                          style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            elevation: 4,
                           ),
                           child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text(
-                                  'Create Account',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
                                     color: Colors.white,
-                                    fontFamily: 'Montserrat',
+                                  ),
+                                )
+                              : Text(
+                                  'Create Account',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                         ),
@@ -272,17 +253,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: RichText(
                           text: TextSpan(
                             text: "Already have an account? ",
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontFamily: 'Montserrat',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                             children: [
                               TextSpan(
                                 text: 'Sign In',
                                 style: TextStyle(
-                                  color: Colors.amber[700],
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Montserrat',
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -294,6 +273,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
             ),
+          ),
           ),
         ),
       ),
