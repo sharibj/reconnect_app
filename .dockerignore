@@ -1,0 +1,42 @@
+# Build outputs
+build/
+.dart_tool/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+README.md
+DEPLOYMENT.md
+
+# Environment files (we'll handle most at runtime, but .env is needed for build)
+.env.*
+
+# Test files
+test/
+integration_test/
+
+# Coverage
+coverage/
+
+# Node modules (if any)
+node_modules/
+
+# Logs
+*.log

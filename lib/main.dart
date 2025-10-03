@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
+import 'services/api_service.dart';
 
 // To set up flutter_dotenv:
 // 1. Add `flutter_dotenv: ^5.2.1` to your `pubspec.yaml` dependencies.
@@ -30,7 +32,55 @@ class ReconnectApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const HomeScreen(),
+      home: const AuthWrapper(),
     );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  _AuthWrapperState createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  final ApiService _apiService = ApiService();
+  bool _isLoading = true;
+  bool _isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+  }
+
+  Future<void> _checkAuthStatus() async {
+    try {
+      final isLoggedIn = await _apiService.isLoggedIn();
+      setState(() {
+        _isLoggedIn = isLoggedIn;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoggedIn = false;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.amber[50],
+        body: const Center(
+          child: CircularProgressIndicator(color: Colors.amber),
+        ),
+      );
+    }
+
+    return _isLoggedIn ? const HomeScreen() : const LoginScreen();
   }
 }

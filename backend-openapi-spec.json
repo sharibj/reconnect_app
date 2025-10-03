@@ -1,0 +1,788 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Reconnect API",
+    "description": "API for managing contacts, interactions, and groups. To authenticate: 1) Use the /api/auth/login endpoint to get a JWT token, 2) Click the 'Authorize' button and enter 'Bearer <your-token>'",
+    "contact": {
+      "name": "Sharib Jafari",
+      "email": "jafarisharib@gmail.com"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Default Server URL"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Reconnect API",
+      "description": "API for managing contacts, interactions, and groups"
+    }
+  ],
+  "paths": {
+    "/api/reconnect/interactions/{id}": {
+      "put": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Update an existing interaction",
+        "operationId": "updateInteraction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the interaction to update",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the interaction to update"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InteractionDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Interaction not found"
+          },
+          "400": {
+            "description": "Invalid interaction data"
+          },
+          "200": {
+            "description": "Interaction successfully updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Delete an interaction",
+        "operationId": "deleteInteraction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the interaction to delete",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the interaction to delete"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Interaction not found"
+          },
+          "204": {
+            "description": "Interaction successfully deleted"
+          }
+        }
+      }
+    },
+    "/api/reconnect/groups/{name}": {
+      "put": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Update an existing group",
+        "operationId": "updateGroup",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Name of the group to update",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Name of the group to update"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Group not found"
+          },
+          "400": {
+            "description": "Invalid group data"
+          },
+          "200": {
+            "description": "Group successfully updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Delete a group",
+        "operationId": "deleteGroup",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Name of the group to delete",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Name of the group to delete"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Group successfully deleted"
+          },
+          "404": {
+            "description": "Group not found"
+          }
+        }
+      }
+    },
+    "/api/reconnect/contacts/{nickName}": {
+      "put": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Update an existing contact",
+        "operationId": "updateContact",
+        "parameters": [
+          {
+            "name": "nickName",
+            "in": "path",
+            "description": "Nickname of the contact to update",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Nickname of the contact to update"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContactDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Contact successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Delete a contact",
+        "operationId": "deleteContact",
+        "parameters": [
+          {
+            "name": "nickName",
+            "in": "path",
+            "description": "Nickname of the contact to delete",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Nickname of the contact to delete"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Contact not found"
+          },
+          "204": {
+            "description": "Contact successfully deleted"
+          }
+        }
+      }
+    },
+    "/api/reconnect/interactions": {
+      "post": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Add a new interaction",
+        "operationId": "addInteraction",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InteractionDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "409": {
+            "description": "Interaction already exists"
+          },
+          "400": {
+            "description": "Invalid interaction data"
+          },
+          "200": {
+            "description": "Interaction successfully added"
+          },
+          "404": {
+            "description": "Contact not found"
+          }
+        }
+      }
+    },
+    "/api/reconnect/groups": {
+      "get": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "List all groups",
+        "operationId": "listGroups",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Add a new group",
+        "operationId": "addGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Group successfully added"
+          },
+          "400": {
+            "description": "Invalid group data"
+          },
+          "409": {
+            "description": "Group already exists"
+          }
+        }
+      }
+    },
+    "/api/reconnect/contacts": {
+      "get": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "List all contacts",
+        "operationId": "listContacts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved contacts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContactDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Add a new contact",
+        "operationId": "addContact",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Contact successfully added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contact data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reconnect/out-of-touch": {
+      "get": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "Get out of touch contacts",
+        "operationId": "getOutOfTouchContacts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved out of touch contacts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReconnectModelDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reconnect/contacts/{nickName}/interactions": {
+      "get": {
+        "tags": [
+          "Reconnect API"
+        ],
+        "summary": "List interactions for a contact",
+        "operationId": "listInteractions",
+        "parameters": [
+          {
+            "name": "nickName",
+            "in": "path",
+            "description": "Nickname of the contact to get interactions for",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Nickname of the contact to get interactions for"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved interactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InteractionDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InteractionDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InteractionDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "contact": {
+            "type": "string"
+          },
+          "timeStamp": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "interactionDetails": {
+            "$ref": "#/components/schemas/InteractionDetailsDTO"
+          },
+          "readableString": {
+            "type": "string"
+          }
+        }
+      },
+      "InteractionDetailsDTO": {
+        "type": "object",
+        "properties": {
+          "selfInitiated": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "GroupDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "frequencyInDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ContactDetailsDTO": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "contactInfo": {
+            "$ref": "#/components/schemas/ContactInfoDTO"
+          }
+        }
+      },
+      "ContactInfoDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateContactDTO": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "type": "string"
+          },
+          "details": {
+            "$ref": "#/components/schemas/ContactDetailsDTO"
+          }
+        }
+      },
+      "ContactDTO": {
+        "type": "object",
+        "properties": {
+          "nickName": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "details": {
+            "$ref": "#/components/schemas/ContactDetailsDTO"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "ReconnectModelDTO": {
+        "type": "object",
+        "properties": {
+          "nickName": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "frequencyInDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastInteractionTimeStamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "description": "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below. Example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  reconnect-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      # Set the API base URL for the backend service
+      # Update this URL to point to your actual backend service
+      - API_BASE_URL=http://localhost:8080/api/reconnect
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Include the backend service in the same compose file
+  # Uncomment and configure if you want to run everything together
+  # reconnect-backend:
+  #   image: your-backend-image:latest
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=prod
+  #     - DATABASE_URL=your-database-url
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+  #     timeout: 10s
+  #     interval: 30s
+  #     retries: 3
+  #     start_period: 40s
+
+networks:
+  default:
+    name: reconnect-network

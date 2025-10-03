@@ -1,21 +1,86 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/auth.dart';
 import '../models/contact.dart';
 import '../models/group.dart';
 import '../models/interaction.dart';
 import '../models/reconnect_model.dart';
+import 'config_service.dart';
 
 class ApiService {
-  // Fetch the base URL from environment variables
-  final String _baseUrl =
-      dotenv.env['API_BASE_URL'] ?? 'http://localhost:8080/api/reconnect';
+  // Get base URLs from ConfigService
+  String get _baseUrl => ConfigService.apiBaseUrl;
+  String get _authBaseUrl => ConfigService.apiBaseUrl.replaceAll('/reconnect', '/auth');
+
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
+  static const String _tokenKey = 'jwt_token';
+
+  // Authentication methods
+  Future<AuthResponse> login(LoginRequest request) async {
+    final response = await http.post(
+      Uri.parse('$_authBaseUrl/login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(request.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
+      await _storage.write(key: _tokenKey, value: authResponse.token);
+      return authResponse;
+    } else {
+      throw Exception('Failed to login. Status code: ${response.statusCode}');
+    }
+  }
+
+  Future<AuthResponse> register(RegisterRequest request) async {
+    final response = await http.post(
+      Uri.parse('$_authBaseUrl/register'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(request.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
+      await _storage.write(key: _tokenKey, value: authResponse.token);
+      return authResponse;
+    } else {
+      throw Exception('Failed to register. Status code: ${response.statusCode}');
+    }
+  }
+
+  Future<void> logout() async {
+    await _storage.delete(key: _tokenKey);
+  }
+
+  Future<String?> getToken() async {
+    return await _storage.read(key: _tokenKey);
+  }
+
+  Future<bool> isLoggedIn() async {
+    final token = await getToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  Future<Map<String, String>> _getAuthHeaders() async {
+    final token = await getToken();
+    return {
+      'Content-Type': 'application/json; charset=UTF-8',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
 
   Future<List<Contact>> getContacts() async {
+    final headers = await _getAuthHeaders();
     final response = await http.get(
       Uri.parse('$_baseUrl/contacts?page=0&size=100'),
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
@@ -30,8 +95,10 @@ class ApiService {
   }
 
   Future<List<ReconnectModel>> getOutOfTouchContacts() async {
+    final headers = await _getAuthHeaders();
     final response = await http.get(
       Uri.parse('$_baseUrl/out-of-touch?page=0&size=100'),
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
@@ -46,11 +113,10 @@ class ApiService {
   }
 
   Future<Contact> addContact(Contact contact) async {
+    final headers = await _getAuthHeaders();
     final response = await http.post(
       Uri.parse('$_baseUrl/contacts'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+      headers: headers,
       body: jsonEncode(contact.toJson()),
     );
 
@@ -64,8 +130,10 @@ class ApiService {
   }
 
   Future<List<Group>> getGroups() async {
+    final headers = await _getAuthHeaders();
     final response = await http.get(
       Uri.parse('$_baseUrl/groups?page=0&size=100'),
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
@@ -80,11 +148,10 @@ class ApiService {
   }
 
   Future<Group> addGroup(Group group) async {
+    final headers = await _getAuthHeaders();
     final response = await http.post(
       Uri.parse('$_baseUrl/groups'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+      headers: headers,
       body: jsonEncode(group.toJson()),
     );
 
@@ -98,11 +165,10 @@ class ApiService {
   }
 
   Future<void> addInteraction(Interaction interaction) async {
+    final headers = await _getAuthHeaders();
     final response = await http.post(
       Uri.parse('$_baseUrl/interactions'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+      headers: headers,
       body: jsonEncode(interaction.toJson()),
     );
 
@@ -114,8 +180,10 @@ class ApiService {
   }
 
   Future<List<Interaction>> getContactInteractions(String contactNickname, int page, int size) async {
+    final headers = await _getAuthHeaders();
     final response = await http.get(
       Uri.parse('$_baseUrl/contacts/$contactNickname/interactions?page=$page&size=$size'),
+      headers: headers,
     );
 
     if (response.statusCode == 200) {
@@ -130,8 +198,10 @@ class ApiService {
   }
 
   Future<void> deleteInteraction(String interactionId) async {
+    final headers = await _getAuthHeaders();
     final response = await http.delete(
       Uri.parse('$_baseUrl/interactions/$interactionId'),
+      headers: headers,
     );
 
     if (response.statusCode != 200 && response.statusCode != 204) {

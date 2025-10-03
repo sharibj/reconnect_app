@@ -3,6 +3,7 @@ import 'add_contact_screen.dart';
 import 'add_group_screen.dart';
 import 'add_interaction_screen.dart';
 import 'view_interactions_screen.dart';
+import 'login_screen.dart';
 import '../services/api_service.dart';
 import '../models/reconnect_model.dart';
 
@@ -40,6 +41,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    try {
+      await apiService.logout();
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Logout failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +77,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: Colors.amber[700],
         elevation: 4,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: _logout,
+            tooltip: 'Logout',
+          ),
+        ],
       ),
       body: Container(
         color: Colors.amber[50],
