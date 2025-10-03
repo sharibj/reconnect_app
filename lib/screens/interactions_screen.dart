@@ -64,6 +64,7 @@ class _InteractionsScreenState extends State<InteractionsScreen> {
         body: _buildInteractionsList(),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: "interactions_fab",
         onPressed: () => _navigateToAddInteraction(),
         label: const Text('Add Interaction'),
         icon: const Icon(Icons.add),

@@ -253,11 +253,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color, {VoidCallback? onTap}) {
-    return MouseRegion(
-      cursor: onTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -310,9 +310,9 @@ class _HomeScreenState extends State<HomeScreen> {
             textAlign: TextAlign.center,
           ),
         ],
-          ),
-        ),
       ),
+    ),
+    ),
     );
   }
 

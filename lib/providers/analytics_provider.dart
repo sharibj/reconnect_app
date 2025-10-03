@@ -55,15 +55,19 @@ class AnalyticsProvider extends ChangeNotifier {
     Map<String, int> groupBreakdown = {};
 
     for (var contact in _outOfTouchContacts) {
-      String status = contact.overdueStatus.status;
+      Color color = contact.overdueStatus.color;
 
-      if (status.contains('Very Overdue') || status.contains('Extremely Overdue')) {
+      if (color == Colors.red || color == Colors.red.shade700) {
+        // Critically overdue (>100% of frequency) or never contacted - Urgent (red)
         urgencyCount['Urgent'] = (urgencyCount['Urgent'] ?? 0) + 1;
-      } else if (status.contains('Overdue')) {
+      } else if (color == Colors.orange) {
+        // Moderately overdue (50-100% of frequency) - Moderate (orange)
         urgencyCount['Moderate'] = (urgencyCount['Moderate'] ?? 0) + 1;
-      } else {
+      } else if (color == Colors.green) {
+        // Slightly overdue (<50% of frequency) - Low (green)
         urgencyCount['Low'] = (urgencyCount['Low'] ?? 0) + 1;
       }
+      // Note: Grey contacts (not overdue) are filtered out by the API and shouldn't be in this list
 
       groupBreakdown[contact.group] = (groupBreakdown[contact.group] ?? 0) + 1;
     }
@@ -113,18 +117,15 @@ class AnalyticsProvider extends ChangeNotifier {
     switch (urgency.toLowerCase()) {
       case 'urgent':
         return _outOfTouchContacts.where((contact) =>
-          contact.overdueStatus.status.contains('Very Overdue') ||
-          contact.overdueStatus.status.contains('Extremely Overdue')
+          contact.overdueStatus.color == Colors.red || contact.overdueStatus.color == Colors.red.shade700
         ).toList();
       case 'moderate':
         return _outOfTouchContacts.where((contact) =>
-          contact.overdueStatus.status.contains('Overdue') &&
-          !contact.overdueStatus.status.contains('Very Overdue') &&
-          !contact.overdueStatus.status.contains('Extremely Overdue')
+          contact.overdueStatus.color == Colors.orange
         ).toList();
       case 'low':
         return _outOfTouchContacts.where((contact) =>
-          !contact.overdueStatus.status.contains('Overdue')
+          contact.overdueStatus.color == Colors.green
         ).toList();
       default:
         return _outOfTouchContacts;

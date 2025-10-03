@@ -83,6 +83,7 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: "contacts_fab",
         onPressed: () => _showAddOptions(context),
         label: const Text('Add'),
         icon: const Icon(Icons.add),

@@ -63,10 +63,9 @@ class OutOfTouchContactCard extends StatelessWidget {
           ),
         ],
       ),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
           onTap: onTap ?? () {
             Navigator.push(
               context,
@@ -77,6 +76,7 @@ class OutOfTouchContactCard extends StatelessWidget {
               ),
             );
           },
+          borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: _buildCardContent(context),
@@ -133,6 +133,7 @@ class OutOfTouchContactCard extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           contact.nickName,
@@ -211,6 +212,7 @@ class OutOfTouchContactCard extends StatelessWidget {
 
   Widget _buildMobileLayout(BuildContext context, Color urgencyColor) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         // First row: Avatar, Name, and Status Badge
         Row(
@@ -290,6 +292,7 @@ class OutOfTouchContactCard extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'Group: ${contact.group}',

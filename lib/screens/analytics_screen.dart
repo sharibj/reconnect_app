@@ -149,9 +149,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Relationship Health Score',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Text(
+                      'Relationship Health Score',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoIcon('Your overall relationship health based on how well you\'re keeping up with contacts according to their group frequencies. Higher scores mean you\'re staying connected consistently.'),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 Center(
@@ -205,8 +211,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                _buildScoreLegend(analytics),
               ],
             ),
           ),
@@ -215,42 +219,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
     );
   }
 
-  Widget _buildScoreLegend(Map<String, dynamic> analytics) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildLegendItem('Urgent', analytics['urgentCount'] ?? 0, Colors.red),
-        _buildLegendItem('Moderate', analytics['moderateCount'] ?? 0, Colors.orange),
-        _buildLegendItem('Good', analytics['lowCount'] ?? 0, Colors.green),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(String label, int count, Color color) {
-    return Column(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          count.toString(),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
-    );
-  }
 
   Widget _buildUrgencyDistributionCard() {
     return Consumer<AnalyticsProvider>(
@@ -271,9 +239,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Attention Priority Distribution',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Text(
+                      'Attention Priority Distribution',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoIcon('Shows overdue contacts by urgency level. Critical (red): >100% overdue or never contacted. Moderate (orange): 50-100% overdue. Minor (green): <50% overdue. Contacts not yet due don\'t appear here.'),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -296,7 +270,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: (value, meta) {
-                              const titles = ['Urgent', 'Moderate', 'Low'];
+                              const titles = ['Critical', 'Moderate', 'Minor'];
                               if (value.toInt() < titles.length) {
                                 return Text(
                                   titles[value.toInt()],
@@ -379,11 +353,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Contacts Needing Attention',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(
+                            'Contacts Needing Attention',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildInfoIcon('Contacts that haven\'t been contacted within their group\'s expected frequency. Tap any contact to view their interaction history and add new interactions.'),
+                        ],
+                      ),
                     ),
                     if (outOfTouchContacts.isNotEmpty)
                       TextButton(
@@ -436,9 +417,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Contacts Overview',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Text(
+                      'Contacts Overview',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoIcon('Summary of your total contacts and groups in the system.'),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -487,9 +474,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Contacts by Group',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Text(
+                      'Contacts by Group',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoIcon('Distribution of contacts across different groups, showing which groups have the most members.'),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 ...sortedGroups.take(5).map((entry) {
@@ -572,9 +565,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Interactions Overview',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Text(
+                      'Interactions Overview',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoIcon('Summary of all your logged interactions. Self-initiated shows what percentage of interactions you started versus contacts reaching out to you.'),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -620,9 +619,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Interaction Types',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Text(
+                      'Interaction Types',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoIcon('Breakdown of how you communicate with contacts - phone calls, video calls, texts, social media, or in-person meetings.'),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 ...typeCounts.entries.map((entry) {
@@ -671,9 +676,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Initiation Ratio',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Text(
+                      'Initiation Ratio',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoIcon('Shows the balance between interactions you initiate versus those your contacts initiate. A balanced ratio indicates healthy mutual engagement.'),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 Center(
@@ -714,8 +725,52 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildLegendItem('You Initiated', selfInitiatedCount, Theme.of(context).colorScheme.primary),
-                    _buildLegendItem('They Initiated', otherInitiatedCount, Theme.of(context).colorScheme.secondary),
+                    Column(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          selfInitiatedCount.toString(),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'You Initiated',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.secondary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          otherInitiatedCount.toString(),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'They Initiated',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -779,6 +834,35 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInfoIcon(String tooltip) {
+    return IconButton(
+      iconSize: 18,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(
+        minWidth: 24,
+        minHeight: 24,
+      ),
+      onPressed: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tooltip),
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      },
+      icon: Icon(
+        Icons.info_outline,
+        size: 18,
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
       ),
     );
   }

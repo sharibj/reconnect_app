@@ -30,21 +30,35 @@ class ReconnectModel {
 
   OverdueStatus get overdueStatus {
     if (lastInteractionTimeStamp == 0) {
-      return OverdueStatus("Never contacted", Colors.grey);
+      return OverdueStatus("Never contacted", Colors.red.shade700);
     }
 
     final lastInteractionDate = DateTime.fromMillisecondsSinceEpoch(lastInteractionTimeStamp);
     final dueDate = lastInteractionDate.add(Duration(days: frequencyInDays));
     final now = DateTime.now();
-    final differenceInDays = now.difference(dueDate).inDays;
+    final overdueDays = now.difference(dueDate).inDays;
 
-    if (differenceInDays > 0) {
-      return OverdueStatus("Overdue by $differenceInDays days", Colors.red);
-    } else if (differenceInDays == 0) {
-      return OverdueStatus("Due today", Colors.orange);
+    if (overdueDays < 0) {
+      // Not overdue yet - shouldn't be in needs attention
+      final daysUntilDue = -overdueDays;
+      return OverdueStatus("Due in $daysUntilDue days", Colors.grey);
+    } else if (overdueDays == 0) {
+      // Due today - classify as minor attention needed
+      return OverdueStatus("Due today", Colors.green);
+    }
+
+    // Calculate urgency based on how overdue relative to frequency
+    final urgencyRatio = overdueDays / frequencyInDays;
+
+    if (urgencyRatio >= 1.0) {
+      // More than 100% overdue (e.g., 20+ days overdue for 10-day frequency)
+      return OverdueStatus("Overdue by $overdueDays days", Colors.red);
+    } else if (urgencyRatio >= 0.5) {
+      // 50-100% overdue (e.g., 15-20 days overdue for 10-day frequency)
+      return OverdueStatus("Overdue by $overdueDays days", Colors.orange);
     } else {
-      final daysUntilDue = -differenceInDays;
-      return OverdueStatus("Due in $daysUntilDue days", Colors.green);
+      // Less than 50% overdue (e.g., 11-14 days overdue for 10-day frequency)
+      return OverdueStatus("Overdue by $overdueDays days", Colors.green);
     }
   }
 }
