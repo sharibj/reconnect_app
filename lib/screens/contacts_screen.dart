@@ -10,7 +10,9 @@ import 'contact_detail_screen.dart';
 import '../services/api_service.dart';
 
 class ContactsScreen extends StatefulWidget {
-  const ContactsScreen({super.key});
+  final int initialTabIndex;
+
+  const ContactsScreen({super.key, this.initialTabIndex = 0});
 
   @override
   State<ContactsScreen> createState() => _ContactsScreenState();
@@ -23,7 +25,11 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ContactProvider>().loadContacts();
       context.read<ContactProvider>().loadGroups();
@@ -45,9 +51,10 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
           return [
             SliverAppBar(
               title: const Text('Contacts'),
-              floating: true,
               pinned: true,
-              expandedHeight: 160,
+              expandedHeight: 200,
+              toolbarHeight: 75,
+              forceElevated: innerBoxIsScrolled,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
                   decoration: BoxDecoration(

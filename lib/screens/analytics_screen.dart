@@ -6,6 +6,7 @@ import '../providers/contact_provider.dart';
 import '../providers/interaction_provider.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/out_of_touch_contact_card.dart';
+import 'needs_attention_screen.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -37,9 +38,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
           return [
             SliverAppBar(
               title: const Text('Analytics'),
-              floating: true,
               pinned: true,
-              expandedHeight: 140,
+              expandedHeight: 180,
+              toolbarHeight: 60,
+              forceElevated: innerBoxIsScrolled,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
                   decoration: BoxDecoration(
@@ -55,7 +57,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                 ),
               ),
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(60),
+                preferredSize: const Size.fromHeight(70),
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   child: TabBar(
@@ -390,9 +392,26 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Contacts Needing Attention',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Contacts Needing Attention',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    if (outOfTouchContacts.isNotEmpty)
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NeedsAttentionScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('View All'),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 if (outOfTouchContacts.isEmpty)

@@ -5,6 +5,8 @@ import 'add_group_screen.dart';
 import 'add_interaction_screen.dart';
 import 'view_interactions_screen.dart';
 import 'analytics_screen.dart';
+import 'needs_attention_screen.dart';
+import 'contacts_screen.dart';
 import 'login_screen.dart';
 import '../services/api_service.dart';
 import '../models/reconnect_model.dart';
@@ -175,6 +177,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         '${contactProvider.totalContacts}',
                         Icons.people,
                         Theme.of(context).colorScheme.primary,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ContactsScreen(initialTabIndex: 0),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -184,6 +194,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         '${analytics['totalOutOfTouch'] ?? 0}',
                         Icons.schedule,
                         Colors.orange,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NeedsAttentionScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -197,6 +215,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         '${contactProvider.totalGroups}',
                         Icons.group,
                         Theme.of(context).colorScheme.tertiary,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ContactsScreen(initialTabIndex: 1),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -206,6 +232,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         '${(analytics['overallHealthScore'] ?? 100.0).round()}%',
                         Icons.favorite,
                         analyticsProvider.getHealthScoreColor(analytics['overallHealthScore'] ?? 100.0),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AnalyticsScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -218,28 +252,33 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.surface,
-            Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+  Widget _buildStatCard(String title, String value, IconData icon, Color color, {VoidCallback? onTap}) {
+    return MouseRegion(
+      cursor: onTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
+          child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
@@ -271,6 +310,8 @@ class _HomeScreenState extends State<HomeScreen> {
             textAlign: TextAlign.center,
           ),
         ],
+          ),
+        ),
       ),
     );
   }
@@ -393,11 +434,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const AnalyticsScreen(),
+                              builder: (context) => const NeedsAttentionScreen(),
                             ),
                           );
                         },
-                        child: const Text('Analytics'),
+                        child: const Text('View All'),
                       ),
                   ],
                 ),

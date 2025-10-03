@@ -41,9 +41,10 @@ class _InteractionsScreenState extends State<InteractionsScreen> {
           return [
             SliverAppBar(
               title: const Text('Interactions'),
-              floating: true,
               pinned: true,
-              expandedHeight: 160,
+              expandedHeight: 200,
+              toolbarHeight: 60,
+              forceElevated: innerBoxIsScrolled,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
                   decoration: BoxDecoration(
@@ -59,7 +60,7 @@ class _InteractionsScreenState extends State<InteractionsScreen> {
                 ),
               ),
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(100),
+                preferredSize: const Size.fromHeight(110),
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   child: Column(
