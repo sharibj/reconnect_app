@@ -12,6 +12,11 @@ RUN flutter pub get
 # Copy the rest of the application
 COPY . .
 
+# Set API_BASE_URL in .env file for Flutter build
+# This will use the API_BASE_URL build arg from Render.com or default
+ARG API_BASE_URL=http://localhost:8080/api/reconnect
+RUN echo "API_BASE_URL=${API_BASE_URL}" > .env
+
 # Build the web app for production (disable WASM dry-run to avoid compilation issues)
 RUN flutter build web --release --no-wasm-dry-run
 
@@ -27,15 +32,8 @@ COPY --from=build /app/build/web /usr/share/nginx/html
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Create environment variable injection script
-COPY inject-env.sh /docker-entrypoint.d/
-RUN chmod +x /docker-entrypoint.d/inject-env.sh
+# Expose port 80
+EXPOSE 80
 
-# Create template for environment variables
-COPY env-config.template.js /usr/share/nginx/html/
-
-# Expose port (Render.com will set PORT environment variable)
-EXPOSE $PORT
-
-# The default nginx entrypoint will run our injection script automatically
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]

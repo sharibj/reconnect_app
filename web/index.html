@@ -31,16 +31,6 @@
 
   <title>Reconnect App</title>
   <link rel="manifest" href="manifest.json">
-
-  <!-- Runtime environment configuration -->
-  <script src="env-config.js"></script>
-
-  <!-- Simple config bridge for Flutter -->
-  <script>
-    window.getApiBaseUrl = function() {
-      return window.ENV && window.ENV.API_BASE_URL ? window.ENV.API_BASE_URL : 'http://localhost:8080/api/reconnect';
-    };
-  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
