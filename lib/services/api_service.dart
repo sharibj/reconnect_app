@@ -365,20 +365,60 @@ class ApiService {
     }
   }
 
-  Future<void> wakeUpBackend() async {
-    try {
-      await http.post(
-        Uri.parse('$_authBaseUrl/login'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode({
-          'username': 'dummy',
-          'password': 'dummy'
-        }),
-      );
-    } catch (e) {
-      // Silently ignore wake-up call failures
+  Future<bool> wakeUpBackend() async {
+    // Try multiple wake-up strategies and verify backend is responsive
+    final wakeUpEndpoints = [
+      '$_authBaseUrl/health',
+      '$_authBaseUrl/login',
+      _baseUrl.replaceAll('/api/reconnect', '/health'),
+      _baseUrl.replaceAll('/api/reconnect', ''),
+    ];
+
+    // First, try to wake up the backend
+    for (final endpoint in wakeUpEndpoints) {
+      try {
+        if (endpoint.contains('/login')) {
+          await http.post(
+            Uri.parse(endpoint),
+            headers: {'Content-Type': 'application/json; charset=UTF-8'},
+            body: jsonEncode({'username': '__wake_up__', 'password': '__wake_up__'}),
+          ).timeout(const Duration(seconds: 15));
+        } else {
+          await http.get(
+            Uri.parse(endpoint),
+            headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          ).timeout(const Duration(seconds: 15));
+        }
+        break; // If any request succeeds, stop trying
+      } catch (e) {
+        // Continue to next endpoint
+        continue;
+      }
     }
+
+    // Wait for backend to fully initialize
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Now verify the backend is actually responsive
+    for (int attempt = 0; attempt < 3; attempt++) {
+      try {
+        final response = await http.get(
+          Uri.parse('$_authBaseUrl/login'),
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        ).timeout(const Duration(seconds: 10));
+
+        // If we get any response (even error), backend is awake
+        if (response.statusCode >= 200 && response.statusCode < 600) {
+          return true;
+        }
+      } catch (e) {
+        if (attempt < 2) {
+          // Wait longer between verification attempts
+          await Future.delayed(const Duration(seconds: 5));
+        }
+      }
+    }
+
+    return false; // Backend is still not responding
   }
 }

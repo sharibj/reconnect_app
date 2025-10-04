@@ -66,6 +66,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
   bool _isLoggedIn = false;
+  String _loadingMessage = 'Initializing...';
+  bool _isBackendWaking = false;
 
   @override
   void initState() {
@@ -74,19 +76,57 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   Future<void> _checkAuthStatus() async {
-    // Wake up the backend
-    _apiService.wakeUpBackend();
+    // First check if we have a token locally (fast check)
+    setState(() {
+      _loadingMessage = 'Checking authentication...';
+    });
 
-    try {
-      final isLoggedIn = await _apiService.isLoggedIn();
+    final token = await _apiService.getToken();
+    final hasToken = token != null && token.isNotEmpty;
+
+    if (hasToken) {
+      // If we have a token, try to wake up the backend
       setState(() {
-        _isLoggedIn = isLoggedIn;
-        _isLoading = false;
+        _loadingMessage = 'Connecting to server...';
+        _isBackendWaking = true;
       });
-    } catch (e) {
+
+      try {
+        // Wake up the backend and verify it's responsive
+        final backendAwake = await _apiService.wakeUpBackend();
+
+        if (backendAwake) {
+          setState(() {
+            _loadingMessage = 'Verifying credentials...';
+          });
+
+          final isLoggedIn = await _apiService.isLoggedIn();
+          setState(() {
+            _isLoggedIn = isLoggedIn;
+            _isLoading = false;
+            _isBackendWaking = false;
+          });
+        } else {
+          // Backend still not responsive, go to login
+          setState(() {
+            _isLoggedIn = false;
+            _isLoading = false;
+            _isBackendWaking = false;
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _isLoggedIn = false;
+          _isLoading = false;
+          _isBackendWaking = false;
+        });
+      }
+    } else {
+      // No token, skip backend wake-up and go to login
       setState(() {
         _isLoggedIn = false;
         _isLoading = false;
+        _isBackendWaking = false;
       });
     }
   }
@@ -96,8 +136,84 @@ class _AuthWrapperState extends State<AuthWrapper> {
     if (_isLoading) {
       return Scaffold(
         backgroundColor: Colors.amber[50],
-        body: const Center(
-          child: CircularProgressIndicator(color: Colors.amber),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.cloud_sync_rounded,
+                  size: 80,
+                  color: Colors.amber[700],
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'Reconnect',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber[800],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (_isBackendWaking) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber[100],
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: Colors.amber.shade300),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: Colors.amber[700],
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Server is waking up (hosted on free tier)',
+                          style: TextStyle(
+                            color: Colors.amber[700],
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                Text(
+                  _loadingMessage,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.amber[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                CircularProgressIndicator(
+                  color: Colors.amber[600],
+                  strokeWidth: 3,
+                ),
+                if (_isBackendWaking) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'This may take up to a minute',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.amber[600],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       );
     }

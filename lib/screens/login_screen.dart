@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _isWakingBackend = false;
 
   @override
   void dispose() {
@@ -50,12 +51,28 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        final errorMessage = e.toString().toLowerCase();
+
+        // Check if error indicates backend is unavailable/sleeping
+        if (errorMessage.contains('connection') ||
+            errorMessage.contains('timeout') ||
+            errorMessage.contains('network') ||
+            errorMessage.contains('host') ||
+            errorMessage.contains('resolve') ||
+            errorMessage.contains('502') ||
+            errorMessage.contains('503') ||
+            errorMessage.contains('504')) {
+
+          _showBackendWakeupDialog();
+        } else {
+          // Show regular error for authentication failures
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Login failed: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } finally {
       if (mounted) {
@@ -64,6 +81,116 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     }
+  }
+
+  Future<void> _showBackendWakeupDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _isWakingBackend ? Icons.cloud_sync_rounded : Icons.cloud_off_rounded,
+                    size: 60,
+                    color: _isWakingBackend ? Colors.amber[600] : Colors.orange[600],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    _isWakingBackend ? 'Waking up server...' : 'Server appears to be sleeping',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _isWakingBackend
+                        ? 'Please wait while we start up the server. This may take up to a minute.'
+                        : 'The app is hosted on a free tier service that sleeps when inactive. Would you like to wake it up?',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  if (_isWakingBackend) ...[
+                    const SizedBox(height: 20),
+                    CircularProgressIndicator(
+                      color: Colors.amber[600],
+                    ),
+                  ],
+                ],
+              ),
+              actions: _isWakingBackend ? null : [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    setDialogState(() {
+                      _isWakingBackend = true;
+                    });
+
+                    try {
+                      // Wake up backend and verify it's responsive
+                      final backendAwake = await _apiService.wakeUpBackend();
+
+                      if (mounted) {
+                        Navigator.of(context).pop();
+
+                        if (backendAwake) {
+                          // Show success message and suggest trying login again
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('✅ Server is now awake! Please try logging in again.'),
+                              backgroundColor: Colors.green,
+                              duration: Duration(seconds: 4),
+                            ),
+                          );
+                        } else {
+                          // Backend still not responsive
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('⚠️ Server is taking longer than expected to wake up. Please wait a moment and try again.'),
+                              backgroundColor: Colors.orange,
+                              duration: Duration(seconds: 6),
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('❌ Failed to wake server. Please check your connection and try again.'),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 5),
+                          ),
+                        );
+                      }
+                    } finally {
+                      if (mounted) {
+                        setState(() {
+                          _isWakingBackend = false;
+                        });
+                      }
+                    }
+                  },
+                  child: const Text('Wake Up Server'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
