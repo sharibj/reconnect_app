@@ -164,10 +164,16 @@ class _EditContactScreenState extends State<EditContactScreen> {
                         ),
                       ),
                       items: [
-                        ..._groups.map((Group group) {
+                        ...(_groups.toList()
+                          ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase())))
+                          .map((Group group) {
                           return DropdownMenuItem<String>(
                             value: group.name,
-                            child: Text(group.name),
+                            child: Text(
+                              group.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           );
                         }),
                         const DropdownMenuItem<String>(

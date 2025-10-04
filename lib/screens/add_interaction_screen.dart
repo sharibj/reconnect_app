@@ -144,6 +144,7 @@ class _AddInteractionScreenState extends State<AddInteractionScreen> {
                           DropdownButtonFormField<String>(
                             value: _selectedContact,
                             hint: const Text('Select Contact'),
+                            isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Contact',
                               prefixIcon: Icon(Icons.person_outline_rounded),
@@ -154,12 +155,24 @@ class _AddInteractionScreenState extends State<AddInteractionScreen> {
                                 _selectedContact = newValue;
                               });
                             },
-                            items: _contacts.map<DropdownMenuItem<String>>((Contact contact) {
-                              return DropdownMenuItem<String>(
-                                value: contact.nickName,
-                                child: Text(contact.nickName),
-                              );
-                            }).toList(),
+                            items: () {
+                              final sortedContacts = List<Contact>.from(_contacts)
+                                ..sort((a, b) => a.nickName.toLowerCase().compareTo(b.nickName.toLowerCase()));
+
+                              return sortedContacts.map<DropdownMenuItem<String>>((Contact contact) {
+                                return DropdownMenuItem<String>(
+                                  value: contact.nickName,
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: Text(
+                                      contact.nickName,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ),
+                                );
+                              }).toList();
+                            }(),
                             validator: (value) => value == null ? 'Please select a contact' : null,
                           ),
                           const SizedBox(height: 24),
@@ -170,6 +183,7 @@ class _AddInteractionScreenState extends State<AddInteractionScreen> {
                           const SizedBox(height: 16),
                           DropdownButtonFormField<String>(
                             value: _interactionType,
+                            isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Interaction Type',
                               prefixIcon: Icon(Icons.forum_outlined),
@@ -184,56 +198,133 @@ class _AddInteractionScreenState extends State<AddInteractionScreen> {
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
-                                child: Text(value),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: Text(
+                                    value,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
                               );
                             }).toList(),
                           ),
                           const SizedBox(height: 20),
-                          Card(
-                            child: ListTile(
-                              leading: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.access_time_rounded,
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          InkWell(
+                            onTap: _pickDateTime,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
                                 ),
                               ),
-                              title: const Text('Interaction Time'),
-                              subtitle: Text(
-                                DateFormat.yMMMd().add_jm().format(_selectedDateTime),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      Icons.access_time_rounded,
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Interaction Time',
+                                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          DateFormat.yMMMd().add_jm().format(_selectedDateTime),
+                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 16,
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                  ),
+                                ],
                               ),
-                              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                              onTap: _pickDateTime,
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          Card(
-                            child: SwitchListTile(
-                              secondary: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: _selfInitiated
-                                    ? Colors.green.withOpacity(0.1)
-                                    : Colors.blue.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  _selfInitiated ? Icons.call_made_rounded : Icons.call_received_rounded,
-                                  color: _selfInitiated ? Colors.green : Colors.blue,
-                                ),
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
                               ),
-                              title: const Text('Who initiated?'),
-                              subtitle: Text(_selfInitiated ? 'You reached out first' : 'They reached out first'),
-                              value: _selfInitiated,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  _selfInitiated = value;
-                                });
-                              },
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: _selfInitiated
+                                      ? Colors.green.withOpacity(0.1)
+                                      : Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    _selfInitiated ? Icons.call_made_rounded : Icons.call_received_rounded,
+                                    color: _selfInitiated ? Colors.green : Colors.blue,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Who initiated?',
+                                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _selfInitiated ? 'You reached out first' : 'They reached out first',
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Switch(
+                                  value: _selfInitiated,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      _selfInitiated = value;
+                                    });
+                                  },
+                                  activeColor: _selfInitiated ? Colors.green : Colors.blue,
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 24),

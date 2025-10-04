@@ -895,6 +895,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
         minHeight: 24,
       ),
       onPressed: () {
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(tooltip),

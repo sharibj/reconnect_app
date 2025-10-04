@@ -106,15 +106,19 @@ class _InteractionsScreenState extends State<InteractionsScreen> {
                   ),
                 ),
               ),
-              ...contacts.map((contact) => DropdownMenuItem<String>(
-                value: contact.nickName,
-                child: Text(
-                  contact.nickName,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
+              ...(contacts.toList()
+                ..sort((a, b) => a.nickName.toLowerCase().compareTo(b.nickName.toLowerCase())))
+                .map((contact) => DropdownMenuItem<String>(
+                  value: contact.nickName,
+                  child: Text(
+                    contact.nickName,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              )),
+                )),
             ],
             onChanged: (value) {
               setState(() {

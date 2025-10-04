@@ -103,10 +103,16 @@ class _EditInteractionScreenState extends State<EditInteractionScreen> {
                         labelText: 'Contact',
                         prefixIcon: Icon(Icons.person),
                       ),
-                      items: _contacts.map((Contact contact) {
+                      items: (_contacts.toList()
+                        ..sort((a, b) => a.nickName.toLowerCase().compareTo(b.nickName.toLowerCase())))
+                        .map((Contact contact) {
                         return DropdownMenuItem<String>(
                           value: contact.nickName,
-                          child: Text(contact.nickName),
+                          child: Text(
+                            contact.nickName,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14),
+                          ),
                         );
                       }).toList(),
                       onChanged: (String? newValue) {
