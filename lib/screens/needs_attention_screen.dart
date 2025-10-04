@@ -6,22 +6,26 @@ import '../widgets/out_of_touch_contact_card.dart';
 import '../models/reconnect_model.dart';
 
 class NeedsAttentionScreen extends StatefulWidget {
-  const NeedsAttentionScreen({super.key});
+  final String? initialPriority;
+
+  const NeedsAttentionScreen({super.key, this.initialPriority});
 
   @override
   State<NeedsAttentionScreen> createState() => _NeedsAttentionScreenState();
 }
 
 class _NeedsAttentionScreenState extends State<NeedsAttentionScreen> {
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _listScrollController = ScrollController();
   bool _isLoadingMore = false;
   int _currentPage = 0;
   final int _pageSize = 20;
+  String _selectedPriority = 'All';
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _selectedPriority = widget.initialPriority ?? 'All';
+    _listScrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AnalyticsProvider>().loadOutOfTouchContacts();
     });
@@ -29,12 +33,12 @@ class _NeedsAttentionScreenState extends State<NeedsAttentionScreen> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _listScrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_listScrollController.position.pixels >= _listScrollController.position.maxScrollExtent - 200) {
       _loadMoreContacts();
     }
   }
@@ -72,9 +76,10 @@ class _NeedsAttentionScreenState extends State<NeedsAttentionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
+      body: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
               title: const Text('Needs Attention'),
@@ -93,16 +98,17 @@ class _NeedsAttentionScreenState extends State<NeedsAttentionScreen> {
                 return const InteractionLoadingList();
               }
 
-              final outOfTouchContacts = analyticsProvider.outOfTouchContacts;
+              final outOfTouchContacts = _getFilteredContacts(analyticsProvider);
 
               if (outOfTouchContacts.isEmpty) {
                 return _buildEmptyState();
               }
 
-              return _buildContactsList(outOfTouchContacts);
+              return _buildContactsList(outOfTouchContacts, analyticsProvider);
             },
           ),
         ),
+      ),
       ),
     );
   }
@@ -138,18 +144,30 @@ class _NeedsAttentionScreenState extends State<NeedsAttentionScreen> {
     );
   }
 
-  Widget _buildContactsList(List<ReconnectModel> contacts) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-      itemCount: contacts.length + (_isLoadingMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == contacts.length) {
-          return _buildLoadingIndicator();
-        }
+  Widget _buildContactsList(List<ReconnectModel> contacts, AnalyticsProvider analyticsProvider) {
+    return Column(
+      children: [
+        Container(
+          height: 60,
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: _buildPriorityFilter(analyticsProvider),
+        ),
+        Expanded(
+          child: ListView.builder(
+            controller: _listScrollController,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+            itemCount: contacts.length + (_isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == contacts.length) {
+                return _buildLoadingIndicator();
+              }
 
-        final contact = contacts[index];
-        return OutOfTouchContactCard(contact: contact);
-      },
+              final contact = contacts[index];
+              return OutOfTouchContactCard(contact: contact);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -160,5 +178,116 @@ class _NeedsAttentionScreenState extends State<NeedsAttentionScreen> {
         child: CircularProgressIndicator(),
       ),
     );
+  }
+
+  Widget _buildPriorityFilter(AnalyticsProvider analyticsProvider) {
+    final totalContacts = analyticsProvider.outOfTouchContacts.length;
+    final criticalCount = analyticsProvider.getContactsByUrgency('urgent').length;
+    final moderateCount = analyticsProvider.getContactsByUrgency('moderate').length;
+    final minorCount = analyticsProvider.getContactsByUrgency('low').length;
+
+    // Auto-reset to 'All' if currently selected filter has no contacts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_selectedPriority != 'All') {
+        int currentCount = 0;
+        switch (_selectedPriority) {
+          case 'Critical':
+            currentCount = criticalCount;
+            break;
+          case 'Moderate':
+            currentCount = moderateCount;
+            break;
+          case 'Minor':
+            currentCount = minorCount;
+            break;
+        }
+        if (currentCount == 0 && mounted) {
+          setState(() {
+            _selectedPriority = 'All';
+          });
+        }
+      }
+    });
+
+    return ListView(
+      scrollDirection: Axis.horizontal,
+      children: [
+        _buildFilterChip('All', null, totalContacts),
+        const SizedBox(width: 8),
+        _buildFilterChip('Critical', Colors.red, criticalCount),
+        const SizedBox(width: 8),
+        _buildFilterChip('Moderate', Colors.orange, moderateCount),
+        const SizedBox(width: 8),
+        _buildFilterChip('Minor', Colors.green, minorCount),
+      ],
+    );
+  }
+
+  Widget _buildFilterChip(String label, Color? color, int count) {
+    final isSelected = _selectedPriority == label;
+    final isEnabled = count > 0;
+
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (color != null) ...[
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: isEnabled ? color : color.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Text('$label ($count)'),
+          ],
+        ),
+        selected: isSelected && isEnabled,
+        onSelected: isEnabled ? (selected) {
+          setState(() {
+            _selectedPriority = selected ? label : 'All';
+          });
+        } : null,
+        backgroundColor: isEnabled
+            ? Theme.of(context).colorScheme.surface
+            : Theme.of(context).colorScheme.surface.withOpacity(0.5),
+        selectedColor: Theme.of(context).colorScheme.primaryContainer,
+        checkmarkColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        labelStyle: TextStyle(
+          color: isEnabled
+              ? (isSelected
+                  ? Theme.of(context).colorScheme.onPrimaryContainer
+                  : Theme.of(context).colorScheme.onSurface)
+              : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+        side: BorderSide(
+          color: isEnabled
+              ? (isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline)
+              : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+        ),
+        elevation: isSelected && isEnabled ? 2 : 0,
+      ),
+    );
+  }
+
+  List<ReconnectModel> _getFilteredContacts(AnalyticsProvider analyticsProvider) {
+    switch (_selectedPriority) {
+      case 'Critical':
+        return analyticsProvider.getContactsByUrgency('urgent');
+      case 'Moderate':
+        return analyticsProvider.getContactsByUrgency('moderate');
+      case 'Minor':
+        return analyticsProvider.getContactsByUrgency('low');
+      default:
+        return analyticsProvider.outOfTouchContacts;
+    }
   }
 }

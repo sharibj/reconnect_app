@@ -240,6 +240,7 @@ class _ViewInteractionsScreenState extends State<ViewInteractionsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           SliverAppBar(
             title: const Text('View Interactions'),

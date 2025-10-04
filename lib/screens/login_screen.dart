@@ -116,6 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
+                            fontSize: MediaQuery.of(context).size.width < 400 ? 22 : null,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -123,6 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Sign in to reconnect with your contacts',
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                            fontSize: MediaQuery.of(context).size.width < 400 ? 14 : null,
                           ),
                           textAlign: TextAlign.center,
                         ),

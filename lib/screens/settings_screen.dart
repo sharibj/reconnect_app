@@ -6,6 +6,7 @@ import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'export_screen.dart';
+import 'privacy_policy_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -321,12 +322,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _launchPrivacyPolicy() async {
-    // In a real app, this would link to your privacy policy
-    const url = 'https://example.com/privacy';
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    }
+  void _launchPrivacyPolicy() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PrivacyPolicyScreen(),
+      ),
+    );
   }
 
   Future<void> _launchTermsOfService() async {
@@ -338,7 +340,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _sendFeedback() async {
-    const email = 'feedback@reconnectapp.com';
+    const email = 'jafarisharib+reconnect@gmail.com';
     const subject = 'Reconnect App Feedback';
     const body = 'Hi Reconnect team,\n\nI have some feedback about the app:\n\n';
 

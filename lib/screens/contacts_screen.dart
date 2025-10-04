@@ -46,8 +46,10 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
+      body: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
               title: const Text('Contacts'),
@@ -81,6 +83,7 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
             _buildGroupsTab(),
           ],
         ),
+      ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: "contacts_fab",
@@ -133,6 +136,17 @@ class _ContactsScreenState extends State<ContactsScreen> with TickerProviderStat
         final contacts = contactProvider.contacts;
 
         if (contacts.isEmpty) {
+          // Check if there are no groups and suggest adding a group first
+          if (contactProvider.groups.isEmpty && contactProvider.searchQuery.isEmpty) {
+            return _buildEmptyState(
+              icon: Icons.group_add_rounded,
+              title: 'Create your first group',
+              subtitle: 'Groups help organize your contacts. You\'ll need at least one group before adding contacts.',
+              actionLabel: 'Add Group',
+              onAction: () => _navigateToAddGroup(),
+            );
+          }
+
           return _buildEmptyState(
             icon: Icons.people_outline,
             title: 'No contacts found',

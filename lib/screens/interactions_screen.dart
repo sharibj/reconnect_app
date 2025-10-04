@@ -36,8 +36,10 @@ class _InteractionsScreenState extends State<InteractionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
+      body: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
               title: const Text('Interactions'),
@@ -62,6 +64,7 @@ class _InteractionsScreenState extends State<InteractionsScreen> {
           ];
         },
         body: _buildInteractionsList(),
+      ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: "interactions_fab",

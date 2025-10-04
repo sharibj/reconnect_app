@@ -1,11 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import '../providers/contact_provider.dart';
 import '../providers/interaction_provider.dart';
+
+// Conditional imports for platform-specific functionality
+import 'dart:html' as html show AnchorElement, Blob, Url;
+import 'dart:typed_data';
 
 class ExportScreen extends StatefulWidget {
   const ExportScreen({super.key});
@@ -177,23 +179,18 @@ class _ExportScreenState extends State<ExportScreen> {
         final contactProvider = context.read<ContactProvider>();
         await contactProvider.loadContacts();
 
-        if (_exportFormat == 'JSON') {
-          exportData['contacts'] = contactProvider.contacts
-              .map((contact) => contact.toJson())
-              .toList();
-        }
+        exportData['contacts'] = contactProvider.contacts
+            .map((contact) => contact.toJson())
+            .toList();
       }
 
       if (_includeInteractions) {
         final interactionProvider = context.read<InteractionProvider>();
-        // Load all interactions (you might want to modify this to load all interactions)
         await interactionProvider.loadInteractions();
 
-        if (_exportFormat == 'JSON') {
-          exportData['interactions'] = interactionProvider.interactions
-              .map((interaction) => interaction.toJson())
-              .toList();
-        }
+        exportData['interactions'] = interactionProvider.interactions
+            .map((interaction) => interaction.toJson())
+            .toList();
       }
 
       String content;
@@ -210,17 +207,14 @@ class _ExportScreenState extends State<ExportScreen> {
         mimeType = 'text/csv';
       }
 
-      // Save to temporary file
-      final directory = await getTemporaryDirectory();
-      final file = File('${directory.path}/$fileName');
-      await file.writeAsString(content);
-
-      // Share the file
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: mimeType)],
-        text: 'Reconnect Data Export',
-        subject: 'Your Reconnect data export is ready',
-      );
+      // Use web-compatible export method
+      if (kIsWeb) {
+        _downloadFileWeb(content, fileName, mimeType);
+      } else {
+        // For mobile platforms, you could implement native sharing
+        // For now, we'll show the content in a dialog with copy option
+        _showExportDialog(content, fileName);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -292,5 +286,60 @@ class _ExportScreenState extends State<ExportScreen> {
     }
 
     return csvLines.join('\n');
+  }
+
+  void _downloadFileWeb(String content, String fileName, String mimeType) {
+    // Create a blob with the content
+    final bytes = utf8.encode(content);
+    final blob = html.Blob([bytes], mimeType);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+
+    // Create a download link and trigger download
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', fileName)
+      ..click();
+
+    // Clean up the object URL
+    html.Url.revokeObjectUrl(url);
+  }
+
+  void _showExportDialog(String content, String fileName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Export Ready'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('File: $fileName'),
+            const SizedBox(height: 16),
+            const Text('Your export data is ready. You can copy the content below:'),
+            const SizedBox(height: 8),
+            Container(
+              height: 200,
+              width: double.maxFinite,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: SingleChildScrollView(
+                child: SelectableText(
+                  content,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 }

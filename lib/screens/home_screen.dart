@@ -135,8 +135,6 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildOutOfTouchSection(),
-                  const SizedBox(height: 24),
                   _buildDashboardStats(),
                   const SizedBox(height: 24),
                   _buildQuickActions(),
@@ -406,80 +404,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildOutOfTouchSection() {
-    return Consumer<AnalyticsProvider>(
-      builder: (context, analyticsProvider, child) {
-        if (analyticsProvider.isLoading) {
-          return const InteractionLoadingList();
-        }
-
-        final outOfTouchContacts = analyticsProvider.outOfTouchContacts;
-
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Needs Attention',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    if (outOfTouchContacts.isNotEmpty)
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const NeedsAttentionScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text('View All'),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                if (outOfTouchContacts.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.celebration,
-                          size: 48,
-                          color: Colors.green.withOpacity(0.7),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Great job! 🎉',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.green,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'You\'re staying connected with all your contacts',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  ...outOfTouchContacts.take(5).map((contact) => OutOfTouchContactCard(
-                    contact: contact,
-                    onTap: () => _navigateAndRefresh(ViewInteractionsScreen(preselectedContactNickName: contact.nickName)),
-                  )),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
 }

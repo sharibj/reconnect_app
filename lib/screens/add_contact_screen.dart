@@ -92,6 +92,139 @@ class _AddContactScreenState extends State<AddContactScreen> {
     }
   }
 
+  Future<void> _showAddGroupDialog() async {
+    final TextEditingController groupNameController = TextEditingController();
+    final TextEditingController frequencyController = TextEditingController();
+    String selectedFrequencyUnit = 'days';
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add New Group'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: groupNameController,
+              decoration: const InputDecoration(
+                labelText: 'Group Name *',
+                hintText: 'e.g., Family, Close Friends, Work',
+                prefixIcon: Icon(Icons.group),
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: frequencyController,
+                    decoration: const InputDecoration(
+                      labelText: 'Contact Frequency *',
+                      hintText: '7',
+                      prefixIcon: Icon(Icons.schedule),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedFrequencyUnit,
+                    decoration: const InputDecoration(
+                      labelText: 'Unit',
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'days', child: Text('Days')),
+                      DropdownMenuItem(value: 'weeks', child: Text('Weeks')),
+                      DropdownMenuItem(value: 'months', child: Text('Months')),
+                    ],
+                    onChanged: (value) {
+                      selectedFrequencyUnit = value ?? 'days';
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Contact frequency determines how often you should reach out to contacts in this group.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (groupNameController.text.trim().isEmpty ||
+                  frequencyController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please fill in all required fields')),
+                );
+                return;
+              }
+
+              try {
+                final frequency = int.parse(frequencyController.text.trim());
+                if (frequency <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Frequency must be a positive number')),
+                  );
+                  return;
+                }
+
+                // Convert frequency to days
+                int frequencyInDays = frequency;
+                switch (selectedFrequencyUnit) {
+                  case 'weeks':
+                    frequencyInDays = frequency * 7;
+                    break;
+                  case 'months':
+                    frequencyInDays = frequency * 30;
+                    break;
+                  // 'days' is already correct
+                }
+
+                final newGroup = Group(
+                  name: groupNameController.text.trim(),
+                  frequencyInDays: frequencyInDays,
+                );
+
+                await apiService.addGroup(newGroup);
+                Navigator.of(context).pop(true);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error creating group: $e')),
+                );
+              }
+            },
+            child: const Text('Create Group'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      // Reload groups and select the newly created one
+      _loadGroups();
+      // Wait a bit for the reload to complete, then select the new group
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (_groups.isNotEmpty) {
+        setState(() {
+          _selectedGroup = _groups.last.name;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,10 +265,27 @@ class _AddContactScreenState extends State<AddContactScreen> {
                   children: [
                     TextFormField(
                       controller: _nickNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nickname',
-                        prefixIcon: Icon(Icons.person_outline_rounded),
+                      decoration: InputDecoration(
+                        labelText: 'Nickname *',
+                        hintText: 'Required field',
+                        prefixIcon: const Icon(Icons.person_outline_rounded),
                         filled: true,
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -147,23 +297,55 @@ class _AddContactScreenState extends State<AddContactScreen> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedGroup,
-                      hint: const Text('Select Group'),
-                      decoration: const InputDecoration(
-                        labelText: 'Group',
-                        prefixIcon: Icon(Icons.group_rounded),
+                      hint: const Text('Select Group (Required)'),
+                      decoration: InputDecoration(
+                        labelText: 'Group *',
+                        prefixIcon: const Icon(Icons.group_rounded),
                         filled: true,
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
                       ),
                       onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedGroup = newValue;
-                        });
+                        if (newValue == '__ADD_NEW_GROUP__') {
+                          _showAddGroupDialog();
+                        } else {
+                          setState(() {
+                            _selectedGroup = newValue;
+                          });
+                        }
                       },
-                      items: _groups.map<DropdownMenuItem<String>>((Group group) {
-                        return DropdownMenuItem<String>(
-                          value: group.name,
-                          child: Text(group.name),
-                        );
-                      }).toList(),
+                      items: [
+                        ..._groups.map<DropdownMenuItem<String>>((Group group) {
+                          return DropdownMenuItem<String>(
+                            value: group.name,
+                            child: Text(group.name),
+                          );
+                        }),
+                        const DropdownMenuItem<String>(
+                          value: '__ADD_NEW_GROUP__',
+                          child: Row(
+                            children: [
+                              Icon(Icons.add_circle_outline, size: 18),
+                              SizedBox(width: 8),
+                              Text('Add New Group...', style: TextStyle(fontStyle: FontStyle.italic)),
+                            ],
+                          ),
+                        ),
+                      ],
                       validator: (value) => value == null ? 'Please select a group' : null,
                     ),
                     const SizedBox(height: 16),

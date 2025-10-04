@@ -33,8 +33,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
+      body: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
               title: const Text('Analytics'),
@@ -71,6 +73,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -81,7 +84,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
         await context.read<ContactProvider>().loadContacts();
       },
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         children: [
           _buildHealthScoreCard(),
           const SizedBox(height: 16),
@@ -101,7 +104,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
         }
 
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           children: [
             _buildContactsOverviewCard(),
             const SizedBox(height: 16),
@@ -117,15 +120,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
   Widget _buildInteractionsTab() {
     return Consumer<InteractionProvider>(
       builder: (context, interactionProvider, child) {
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _buildInteractionsOverviewCard(),
-            const SizedBox(height: 16),
-            _buildInteractionTypesCard(),
-            const SizedBox(height: 16),
-            _buildInitiationRatioCard(),
-          ],
+        return RefreshIndicator(
+          onRefresh: () async {
+            await context.read<InteractionProvider>().loadInteractions();
+          },
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            children: [
+              _buildInteractionsOverviewCard(),
+              const SizedBox(height: 16),
+              _buildInteractionTypesCard(),
+              const SizedBox(height: 16),
+              _buildInitiationRatioCard(),
+            ],
+          ),
         );
       },
     );
@@ -151,9 +159,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
               children: [
                 Row(
                   children: [
-                    Text(
-                      'Relationship Health Score',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    Expanded(
+                      child: Text(
+                        'Relationship Health Score',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontSize: MediaQuery.of(context).size.width < 400 ? 18 : null,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     _buildInfoIcon('Your overall relationship health based on how well you\'re keeping up with contacts according to their group frequencies. Higher scores mean you\'re staying connected consistently.'),
@@ -241,9 +253,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
               children: [
                 Row(
                   children: [
-                    Text(
-                      'Attention Priority Distribution',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    Expanded(
+                      child: Text(
+                        'Attention Priority Distribution',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontSize: MediaQuery.of(context).size.width < 400 ? 18 : null,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     _buildInfoIcon('Shows overdue contacts by urgency level. Critical (red): >100% overdue or never contacted. Moderate (orange): 50-100% overdue. Minor (green): <50% overdue. Contacts not yet due don\'t appear here.'),
@@ -256,6 +272,34 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
                       barGroups: _createUrgencyBars(urgencyDistribution),
+                      barTouchData: BarTouchData(
+                        touchTooltipData: BarTouchTooltipData(
+                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                            const titles = ['Critical', 'Moderate', 'Minor'];
+                            if (groupIndex < titles.length) {
+                              return BarTooltipItem(
+                                '${titles[groupIndex]}: ${rod.toY.round()} contacts\nTap to filter',
+                                const TextStyle(color: Colors.white),
+                              );
+                            }
+                            return null;
+                          },
+                        ),
+                        touchCallback: (FlTouchEvent event, BarTouchResponse? barTouchResponse) {
+                          if (event is FlTapUpEvent && barTouchResponse != null && barTouchResponse.spot != null) {
+                            final touchedIndex = barTouchResponse.spot!.touchedBarGroupIndex;
+                            const priorities = ['Critical', 'Moderate', 'Minor'];
+                            if (touchedIndex < priorities.length) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NeedsAttentionScreen(initialPriority: priorities[touchedIndex]),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      ),
                       titlesData: FlTitlesData(
                         leftTitles: const AxisTitles(
                           sideTitles: SideTitles(showTitles: false),
@@ -357,9 +401,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with TickerProviderSt
                     Expanded(
                       child: Row(
                         children: [
-                          Text(
-                            'Contacts Needing Attention',
-                            style: Theme.of(context).textTheme.headlineSmall,
+                          Flexible(
+                            child: Text(
+                              'Contacts Needing Attention',
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontSize: MediaQuery.of(context).size.width < 400 ? 18 : null,
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 8),
                           _buildInfoIcon('Contacts that haven\'t been contacted within their group\'s expected frequency. Tap any contact to view their interaction history and add new interactions.'),
